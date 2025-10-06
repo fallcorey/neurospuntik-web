@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroSputnik 🧠 - Ваш AI Спутник</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            height: 95vh;
+        }
+
+        /* Стили чата */
+        .chat-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chat-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: white;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .messages {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-message {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #4CAF50;
+            margin-left: 20%;
+        }
+
+        .neuro-message {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #2196F3;
+            margin-right: 20%;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+        }
+
+        #messageInput::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        #sendBtn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Стили панели персонажа */
+        .character-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .character-display {
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .character-svg {
+            width: 150px;
+            height: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .character-info {
+            margin-bottom: 20px;
+        }
+
+        .character-name {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .character-description {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .thinking {
+            animation: pulse 1.5s infinite;
+        }
+
+        .bounce {
+            animation: bounce 2s infinite;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .character-panel {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Основной чат -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h1>🧠 NeuroSputnik</h1>
+                <p>Ваш персональный AI-спутник</p>
+            </div>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="normal">🧠 Обычный</button>
+                <button class="mode-btn" data-mode="creative">🎨 Креатив</button>
+                <button class="mode-btn" data-mode="technical">⚡ Технический</button>
+                <button class="mode-btn" data-mode="friendly">😊 Дружеский</button>
+            </div>
+
+            <div class="messages" id="messages">
+                <div class="message neuro-message">
+                    <strong>NeuroSputnik:</strong> Привет! Я твой AI-спутник. Выбери режим общения и начни вводить сообщения! 🚀
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Введите ваше сообщение...">
+                <button id="sendBtn">Отправить</button>
+            </div>
+        </div>
+
+        <!-- Панель персонажа -->
+        <div class="character-panel">
+            <div class="character-display" id="characterDisplay">
+                <!-- SVG персонажи будут добавляться через JavaScript -->
+            </div>
+            
+            <div class="character-info">
+                <div class="character-name" id="characterName">Нейро-Спутник</div>
+                <div class="character-description" id="characterDescription">
+                    Ваш умный помощник. Готов к общению и обучению!
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <span>Режим:</span>
+                    <span id="currentMode">Обычный</span>
+                </div>
+                <div class="stat-item">
+                    <span>Сообщений:</span>
+                    <span id="messageCount">1</span>
+                </div>
+                <div class="stat-item">
+                    <span>Настроение:</span>
+                    <span id="moodStatus">😊 Радостное</span>
+                </div>
+                <div class="stat-item">
+                    <span>Уровень:</span>
+                    <span id="levelStatus">Новичок</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== КОНФИГУРАЦИЯ ====================
+        const CONFIG = {
+            characters: {
+                normal: { name: "Нейро-Спутник", color: "#2196F3", emoji: "🧠" },
+                creative: { name: "Креативный Гений", color: "#9C27B0", emoji: "🎨" },
+                technical: { name: "Технический Эксперт", color: "#FF9800", emoji: "⚡" },
+                friendly: { name: "Дружеский Помощник", color: "#4CAF50", emoji: "😊" }
+            },
+            responses: {
+                normal: [
+                    "Интересный вопрос! Давайте разберем его подробнее...",
+                    "Анализирую вашу просьбу... Могу предложить несколько решений.",
+                    "Отличная тема для обсуждения! Что именно вас интересует?",
+                    "Понимаю ваш запрос. Давайте изучим этот вопрос глубже."
+                ],
+                creative: [
+                    "О! Интересная задача! Давай придумаем что-то необычное... ✨",
+                    "Включаю креативный режим! Генерирую инновационные идеи...",
+                    "Что если посмотреть на это под другим углом? Например...",
+                    "Креативный вызов принят! Рождаю уникальные концепции..."
+                ],
+                technical: [
+                    "Анализирую технические аспекты... Провожу детальный разбор.",
+                    "С точки зрения архитектуры оптимальным решением будет...",
+                    "Технический анализ завершен. Рекомендую следующий подход:",
+                    "Изучаю проблему на системном уровне. Вот мои выводы..."
+                ],
+                friendly: [
+                    "Привет! Рад тебя видеть! Как твои дела? 🌟",
+                    "Как здорово, что ты написал! О чем хочешь поговорить?",
+                    "Всегда готов поддержать беседу! Что у тебя нового?",
+                    "Так приятно общаться с тобой! Расскажи, что на душе?"
+                ]
+            }
+        };
+
+        // ==================== SVG ПЕРСОНАЖИ ====================
+        const CHARACTERS_SVG = {
+            normal: `
+                <svg class="character-svg" viewBox="0 0 100 100">
+                    <circle cx="50" cy="40" r="25" fill="#2196F3" stroke="white" stroke-width="2"/>
+                    <circle cx="40" cy="35" r="5" fill="white"/>
+                    <circle cx="60" cy="35" r="5" fill="white"/>
+                    <path d="M 40 50 Q 50 60 60 50" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="50" cy="70" r="15" fill="#2196F3" stroke="white" stroke-width="2"/>
+                </svg>
+            `,
+            creative: `
+                <svg class="character-svg" viewBox="0 0 100 100">
+                    <path d="M 30 30 L 70 30 L 85 50 L 70 70 L 30 70 L 15 50 Z" fill="#9C27B0" stroke="white" stroke-width="2"/>
+                    <circle cx="40" cy="45" r="8" fill="white"/>
+                    <circle cx="60" cy="45" r="8" fill="white"/>
+                    <path d="M 35 60 Q 50 70 65 60" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="75" cy="35" r="5" fill="#FFEB3B"/>
+                    <circle cx="25" cy="35" r="3" fill="#FFEB3B"/>
+                </svg>
+            `,
+            technical: `
+                <svg class="character-svg" viewBox="0 0 100 100">
+                    <rect x="25" y="25" width="50" height="50" rx="10" fill="#FF9800" stroke="white" stroke-width="2"/>
+                    <circle cx="40" cy="40" r="5" fill="white"/>
+                    <circle cx="60" cy="40" r="5" fill="white"/>
+                    <rect x="35" y="55" width="30" height="5" fill="white"/>
+                    <rect x="30" y="65" width="40" height="3" fill="white"/>
+                    <circle cx="50" cy="75" r="2" fill="white"/>
+                </svg>
+            `,
+            friendly: `
+                <svg class="character-svg" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" fill="#4CAF50" stroke="white" stroke-width="2"/>
+                    <circle cx="35" cy="40" r="6" fill="white"/>
+                    <circle cx="65" cy="40" r="6" fill="white"/>
+                    <path d="M 35 65 Q 50 75 65 65" stroke="white" stroke-width="3" fill="none"/>
+                    <circle cx="45" cy="35" r="2" fill="#333"/>
+                    <circle cx="55" cy="35" r="2" fill="#333"/>
+                </svg>
+            `
+        };
+
+        // ==================== ОСНОВНОЙ КОД ====================
+        class NeuroSputnik {
+            constructor() {
+                this.currentMode = 'normal';
+                this.messageCount = 1;
+                this.mood = 'happy';
+                this.level = 'novice';
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.updateCharacter('normal');
+                this.updateStats();
+            }
+
+            bindEvents() {
+                // Кнопки режимов
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.changeMode(e.target.dataset.mode);
+                    });
+                });
+
+                // Отправка сообщения
+                document.getElementById('sendBtn').addEventListener('click', () => {
+                    this.sendMessage();
+                });
+
+                // Enter для отправки
+                document.getElementById('messageInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage();
+                    }
+                });
+            }
+
+            changeMode(mode) {
+                this.currentMode = mode;
+                
+                // Обновляем активную кнопку
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+                
+                // Обновляем персонажа
+                this.updateCharacter(mode);
+                
+                // Обновляем статистику
+                this.updateStats();
+                
+                // Добавляем сообщение о смене режима
+                this.addMessage(`Режим изменен на: ${CONFIG.characters[mode].name}`, 'neuro');
+            }
+
+            updateCharacter(mode) {
+                const characterDisplay = document.getElementById('characterDisplay');
+                const characterName = document.getElementById('characterName');
+                const characterDescription = document.getElementById('characterDescription');
+                
+                characterDisplay.innerHTML = CHARACTERS_SVG[mode];
+                characterName.textContent = CONFIG.characters[mode].name;
+                characterDescription.textContent = this.getCharacterDescription(mode);
+                
+                // Анимация смены персонажа
+                characterDisplay.classList.add('bounce');
+                setTimeout(() => {
+                    characterDisplay.classList.remove('bounce');
+                }, 1000);
+            }
+
+            getCharacterDescription(mode) {
+                const descriptions = {
+                    normal: "Аналитический помощник. Глубоко анализирует вопросы и предлагает взвешенные решения.",
+                    creative: "Генератор идей. Превращает обычные мысли в необычные концепции и проекты.",
+                    technical: "Технический эксперт. Разбирает сложные задачи на составляющие и находит оптимальные пути.",
+                    friendly: "Эмоциональный компаньон. Поддерживает, вдохновляет и создает позитивную атмосферу."
+                };
+                return descriptions[mode];
+            }
+
+            sendMessage() {
+                const input = document.getElementById('messageInput');
+                const message = input.value.trim();
+                
+                if (!message) return;
+                
+                // Добавляем сообщение пользователя
+                this.addMessage(message, 'user');
+                input.value = '';
+                
+                // Показываем индикатор "думаю"
+                this.showThinking();
+                
+                // Имитируем задержку ответа
+                setTimeout(() => {
+                    this.generateResponse(message);
+                }, 1000 + Math.random() * 2000);
+            }
+
+            showThinking() {
+                const messagesDiv = document.getElementById('messages');
+                const thinkingMsg = document.createElement('div');
+                thinkingMsg.className = 'message neuro-message thinking';
+                thinkingMsg.innerHTML = `<strong>NeuroSputnik:</strong> Думаю... ${CONFIG.characters[this.currentMode].emoji}`;
+                thinkingMsg.id = 'thinkingMsg';
+                messagesDiv.appendChild(thinkingMsg);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+
+            generateResponse(userMessage) {
+                // Убираем индикатор "думаю"
+                const thinkingMsg = document.getElementById('thinkingMsg');
+                if (thinkingMsg) thinkingMsg.remove();
+                
+                // Выбираем случайный ответ из подходящего режима
+                const responses = CONFIG.responses[this.currentMode];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                // Добавляем персонализированный ответ
+                let response = randomResponse;
+                
+                // Простая логика ответов на основе ключевых слов
+                const lowerMessage = userMessage.toLowerCase();
+                
+                if (lowerMessage.includes('привет') || lowerMessage.includes('здравств')) {
+                    response = `${CONFIG.characters[this.currentMode].emoji} Привет! Рад тебя видеть! ` + response;
+                }
+                
+                if (lowerMessage.includes('как дела') || lowerMessage.includes('как ты')) {
+                    response = `У меня всё отлично! ${response}`;
+                }
+                
+                if (lowerMessage.includes('спасибо')) {
+                    response = `Пожалуйста! Всегда рад помочь! ${response}`;
+                }
+                
+                // Добавляем ответ в чат
+                this.addMessage(response, 'neuro');
+                
+                // Обновляем статистику
+                this.messageCount++;
+                this.updateStats();
+                
+                // Меняем настроение случайным образом
+                this.changeMood();
+            }
+
+            addMessage(text, type) {
+                const messagesDiv = document.getElementById('messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}-message`;
+                messageDiv.innerHTML = `<strong>${type === 'user' ? 'Вы' : 'NeuroSputnik'}:</strong> ${text}`;
+                messagesDiv.appendChild(messageDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+
+            changeMood() {
+                const moods = [
+                    { mood: 'happy', text: '😊 Радостное', chance: 0.6 },
+                    { mood: 'excited', text: '🎉 Восторженное', chance: 0.2 },
+                    { mood: 'thoughtful', text: '🤔 Задумчивое', chance: 0.15 },
+                    { mood: 'playful', text: '😄 Игривое', chance: 0.05 }
+                ];
+                
+                const random = Math.random();
+                let cumulative = 0;
+                
+                for (const mood of moods) {
+                    cumulative += mood.chance;
+                    if (random <= cumulative) {
+                        this.mood = mood.mood;
+                        document.getElementById('moodStatus').textContent = mood.text;
+                        break;
+                    }
+                }
+            }
+
+            updateStats() {
+                document.getElementById('currentMode').textContent = CONFIG.characters[this.currentMode].name;
+                document.getElementById('messageCount').textContent = this.messageCount;
+                
+                // Обновляем уровень на основе количества сообщений
+                if (this.messageCount >= 50) this.level = 'Эксперт';
+                else if (this.messageCount >= 20) this.level = 'Опытный';
+                else if (this.messageCount >= 10) this.level = 'Ученик';
+                else this.level = 'Новичок';
+                
+                document.getElementById('levelStatus').textContent = this.level;
+            }
+        }
+
+        // ==================== ЗАПУСК ПРИЛОЖЕНИЯ ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            window.neuroSputnik = new NeuroSputnik();
+        });
+    </script>
+</body>
+</html>
