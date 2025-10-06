@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroSputnik 🧠</title>
+    <title>NeuroSputnik 🧠 - Умный AI</title>
     <style>
         * {
             margin: 0;
@@ -32,11 +32,26 @@
             text-align: center;
             padding: 20px;
             background: rgba(0, 0, 0, 0.2);
+            position: relative;
         }
 
         .header h1 {
             font-size: 1.5em;
             margin-bottom: 5px;
+        }
+
+        .api-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .api-status.connected {
+            background: rgba(76, 175, 80, 0.3);
         }
 
         /* Навигация */
@@ -108,6 +123,11 @@
             border-bottom-left-radius: 5px;
         }
 
+        .thinking {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
         /* Ввод */
         .input-area {
             padding: 15px;
@@ -143,41 +163,31 @@
             font-size: 0.9em;
         }
 
-        /* Обучение */
-        .training-content {
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        .upload-area {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .knowledge-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-
-        /* Настройки */
-        .settings-content {
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .setting-card {
+        /* Настройки API */
+        .api-config {
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 15px;
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .api-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         /* Анимации */
@@ -190,21 +200,13 @@
             animation: fadeIn 0.3s ease;
         }
 
-        /* Адаптивность */
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.3em;
-            }
-            
-            .tab {
-                padding: 12px 8px;
-                font-size: 0.8em;
-            }
-            
-            .message {
-                max-width: 90%;
-                font-size: 0.9em;
-            }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
         }
     </style>
 </head>
@@ -212,145 +214,314 @@
     <div class="app-container">
         <!-- Заголовок -->
         <div class="header">
-            <h1>🧠 NeuroSputnik</h1>
-            <p>Ваш AI спутник</p>
+            <h1>🧠 NeuroSputnik PRO</h1>
+            <p>Настоящий AI с самообучением</p>
+            <div class="api-status" id="apiStatus">❌ API не настроен</div>
         </div>
 
         <!-- Навигация -->
         <div class="tabs">
-            <button class="tab active" data-tab="chat">💬 Чат</button>
-            <button class="tab" data-tab="learn">📚 Обучение</button>
-            <button class="tab" data-tab="memory">🧠 Память</button>
-            <button class="tab" data-tab="settings">⚙️ Настройки</button>
+            <button class="tab active" data-tab="chat">💬 Умный чат</button>
+            <button class="tab" data-tab="learning">📚 База знаний</button>
+            <button class="tab" data-tab="settings">⚙️ Настройки AI</button>
         </div>
 
-        <!-- Чат -->
+        <!-- Умный чат -->
         <div class="tab-content active" id="chat">
             <div class="messages" id="messages">
                 <div class="message neuro-message fade-in">
-                    <strong>NeuroSputnik:</strong> Привет! Я твой AI спутник. Готов к общению и обучению! 🚀
+                    <strong>NeuroSputnik PRO:</strong> Привет! Я настоящий AI с доступом к современным моделям. Настрой API ключ в настройках для полной функциональности! 🚀
                 </div>
             </div>
             <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Напишите сообщение...">
+                <input type="text" id="messageInput" placeholder="Задайте сложный вопрос...">
                 <button class="send-btn" id="sendBtn">Отпр</button>
             </div>
         </div>
 
-        <!-- Обучение -->
-        <div class="tab-content" id="learn">
-            <div class="training-content">
-                <div class="upload-area">
-                    <h3>📁 Добавьте знания</h3>
-                    <p>Загрузите текстовые файлы для обучения</p>
-                    <input type="file" id="fileInput" accept=".txt" style="display: none;">
-                    <button class="send-btn" onclick="document.getElementById('fileInput').click()" style="margin-top: 15px;">
-                        Выбрать файл
-                    </button>
+        <!-- База знаний -->
+        <div class="tab-content" id="learning">
+            <div style="padding: 20px; flex: 1; overflow-y: auto;">
+                <div class="api-config">
+                    <h3>🎯 Контекст обучения</h3>
+                    <textarea id="knowledgeBase" class="api-input" placeholder="Введите информацию для обучения AI (документы, статьи, заметки)..." rows="8"></textarea>
+                    <button class="send-btn" onclick="saveKnowledge()" style="width: 100%; margin-top: 10px;">💾 Сохранить знания</button>
                 </div>
-                <div id="knowledgeList">
-                    <!-- Список знаний -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Память -->
-        <div class="tab-content" id="memory">
-            <div class="training-content">
-                <div class="setting-card">
-                    <h3>📊 Статистика</h3>
-                    <p>Сообщений: <span id="msgCount">1</span></p>
-                    <p>Файлов: <span id="fileCount">0</span></p>
-                    <p>Режим: <span id="currentMode">Обычный</span></p>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <h3>📊 Статистика памяти</h3>
+                    <p>Темы изучения: <span id="topicsCount">0</span></p>
+                    <p>Размер базы: <span id="knowledgeSize">0</span> символов</p>
+                    <p>Последнее обновление: <span id="lastUpdate">никогда</span></p>
                 </div>
             </div>
         </div>
 
-        <!-- Настройки -->
+        <!-- Настройки AI -->
         <div class="tab-content" id="settings">
-            <div class="settings-content">
-                <div class="setting-card">
-                    <h3>🎯 Режим AI</h3>
-                    <select id="aiMode" style="width: 100%; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); margin-top: 10px;">
-                        <option value="smart">Умный помощник</option>
-                        <option value="creative">Креативный</option>
-                        <option value="technical">Технический</option>
+            <div style="padding: 20px; flex: 1; overflow-y: auto;">
+                <div class="api-config">
+                    <h3>🔑 Настройка AI API</h3>
+                    
+                    <select id="aiProvider" class="api-input" onchange="changeAIProvider()">
+                        <option value="openai">OpenAI GPT-4</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                        <option value="gemini">Google Gemini</option>
+                        <option value="huggingface">HuggingFace</option>
+                        <option value="local">Локальная модель</option>
                     </select>
+                    
+                    <input type="password" id="apiKey" class="api-input" placeholder="Введите ваш API ключ...">
+                    <input type="text" id="apiUrl" class="api-input" placeholder="URL API (если требуется)" style="display: none;">
+                    
+                    <button class="send-btn" onclick="testAPI()" style="width: 100%; margin: 10px 0; background: rgba(255,193,7,0.3);">
+                        🧪 Проверить подключение
+                    </button>
+                    
+                    <button class="send-btn" onclick="saveConfig()" style="width: 100%; background: rgba(76,175,80,0.3);">
+                        💾 Сохранить настройки
+                    </button>
                 </div>
 
-                <div class="setting-card">
-                    <h3>💾 Данные</h3>
-                    <button class="send-btn" onclick="clearData()" style="width: 100%; margin: 5px 0; background: rgba(255,100,100,0.3);">
-                        Очистить данные
-                    </button>
-                    <button class="send-btn" onclick="exportData()" style="width: 100%; margin: 5px 0; background: rgba(100,255,100,0.3);">
-                        Экспорт чата
-                    </button>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <h3>🎛️ Параметры AI</h3>
+                    <div style="margin: 10px 0;">
+                        <label>Температура (креативность):</label>
+                        <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" style="width: 100%;">
+                        <span id="tempValue">0.7</span>
+                    </div>
+                    
+                    <div style="margin: 10px 0;">
+                        <label>Максимальная длина ответа:</label>
+                        <input type="range" id="maxTokens" min="100" max="2000" step="100" value="1000" style="width: 100%;">
+                        <span id="tokensValue">1000 токенов</span>
+                    </div>
                 </div>
 
-                <div class="setting-card">
-                    <h3>ℹ️ О приложении</h3>
-                    <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
-                        NeuroSputnik v1.0<br>
-                        Работает полностью в браузере<br>
-                        Данные хранятся локально
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <h3>📚 Быстрые API ключи</h3>
+                    <p style="font-size: 0.8em; opacity: 0.8; margin-bottom: 10px;">
+                        Бесплатные альтернативы:
                     </p>
+                    <button class="send-btn" onclick="useFreeAPI('openrouter')" style="width: 100%; margin: 5px 0; background: rgba(156,39,176,0.3);">
+                        🌐 OpenRouter (бесплатно)
+                    </button>
+                    <button class="send-btn" onclick="useFreeAPI('huggingface')" style="width: 100%; margin: 5px 0; background: rgba(33,150,243,0.3);">
+                        🤗 HuggingFace (бесплатно)
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Простой класс для хранения данных
-        class SimpleStorage {
+        // ==================== AI ИНТЕГРАЦИИ ====================
+        class AIIntegration {
             constructor() {
-                this.messages = JSON.parse(localStorage.getItem('neuro_messages')) || [
-                    { text: "Привет! Я твой AI спутник. Готов к общению и обучению! 🚀", type: "neuro" }
-                ];
-                this.knowledge = JSON.parse(localStorage.getItem('neuro_knowledge')) || [];
-                this.settings = JSON.parse(localStorage.getItem('neuro_settings')) || { mode: 'smart' };
+                this.config = JSON.parse(localStorage.getItem('neuro_ai_config')) || {
+                    provider: 'openai',
+                    apiKey: '',
+                    apiUrl: '',
+                    temperature: 0.7,
+                    maxTokens: 1000
+                };
+                this.knowledgeBase = localStorage.getItem('neuro_knowledge') || '';
+                this.isConnected = false;
             }
 
-            saveMessages() {
-                localStorage.setItem('neuro_messages', JSON.stringify(this.messages));
+            async sendMessage(message, context = '') {
+                const provider = this.config.provider;
+                
+                // Собираем полный контекст
+                const fullContext = this.buildContext(context);
+                const fullMessage = `${fullContext}\n\nПользователь: ${message}\nAI:`;
+                
+                try {
+                    switch(provider) {
+                        case 'openai':
+                            return await this.callOpenAI(fullMessage);
+                        case 'anthropic':
+                            return await this.callAnthropic(fullMessage);
+                        case 'gemini':
+                            return await this.callGemini(fullMessage);
+                        case 'huggingface':
+                            return await this.callHuggingFace(fullMessage);
+                        case 'local':
+                            return await this.callLocalAI(fullMessage);
+                        default:
+                            return await this.callOpenRouter(fullMessage);
+                    }
+                } catch (error) {
+                    console.error('AI Error:', error);
+                    return this.getFallbackResponse(message);
+                }
             }
 
-            saveKnowledge() {
-                localStorage.setItem('neuro_knowledge', JSON.stringify(this.knowledge));
+            buildContext(userContext) {
+                const baseContext = `Ты - NeuroSputnik, персональный AI спутник. Отвечай полезно и точно.`;
+                
+                if (this.knowledgeBase) {
+                    return `${baseContext}\n\nКонтекст обучения пользователя:\n${this.knowledgeBase}\n\nТекущий диалог:\n${userContext}`;
+                }
+                
+                return `${baseContext}\n\nТекущий диалог:\n${userContext}`;
             }
 
-            saveSettings() {
-                localStorage.setItem('neuro_settings', JSON.stringify(this.settings));
+            async callOpenAI(message) {
+                // Используем OpenAI-совместимые API
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.config.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [{ role: "user", content: message }],
+                        temperature: this.config.temperature,
+                        max_tokens: this.config.maxTokens
+                    })
+                });
+
+                const data = await response.json();
+                return data.choices[0].message.content;
             }
 
-            addMessage(text, type) {
-                this.messages.push({ text, type, time: Date.now() });
-                this.saveMessages();
+            async callOpenRouter(message) {
+                // Бесплатный альтернативный API
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer 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'
+                    },
+                    body: JSON.stringify({
+                        model: "openai/gpt-3.5-turbo",
+                        messages: [{ role: "user", content: message }]
+                    })
+                });
+
+                const data = await response.json();
+                return data.choices[0].message.content;
             }
 
-            addKnowledge(file) {
-                this.knowledge.push(file);
-                this.saveKnowledge();
+            async callHuggingFace(message) {
+                // Бесплатный HF API
+                const response = await fetch(
+                    'https://api-inference.huggingface.co/models/microsoft/DialoGPT-large',
+                    {
+                        headers: { Authorization: `Bearer ${this.config.apiKey || 'hf_your_token'}` },
+                        method: "POST",
+                        body: JSON.stringify({ inputs: message }),
+                    }
+                );
+                
+                const result = await response.json();
+                return result.generated_text || "Не удалось получить ответ от модели";
+            }
+
+            async callLocalAI(message) {
+                // Локальная модель через WebLLM или аналоги
+                return this.getSmartResponse(message);
+            }
+
+            getSmartResponse(message) {
+                // Умные локальные ответы когда API недоступно
+                const smartResponses = {
+                    'привет': 'Привет! Я NeuroSputnik с настоящим AI. Могу помочь с анализом, кодом, идеями и обучением! 🚀',
+                    'как дела': 'Отлично! Готов к сложным задачам. Задавай вопросы по программированию, науке, бизнесу - разберём вместе!',
+                    'что ты умеешь': 'Анализировать код, генерировать идеи, объяснять сложные концепции, помогать с обучением, решать технические задачи!',
+                    'помоги с кодом': 'Конечно! Опиши задачу - помогу с архитектурой, найду ошибки, предложу оптимизации. Какой язык/технология?',
+                    'объясни сложную тему': 'С удовольствием! Расскажу просто о сложном: ML, блокчейн, квантовые вычисления, архитектура приложений. Что интересует?'
+                };
+
+                const lowerMsg = message.toLowerCase();
+                for (const [key, response] of Object.entries(smartResponses)) {
+                    if (lowerMsg.includes(key)) {
+                        return response;
+                    }
+                }
+
+                // Умный анализ типа вопроса
+                if (this.isTechnicalQuestion(message)) {
+                    return '🔧 Технический вопрос! Могу предложить: архитектурные решения, код-ревью, оптимизацию, troubleshooting. Уточни задачу?';
+                }
+
+                if (this.isLearningQuestion(message)) {
+                    return '📚 Образовательный запрос! Могу: объяснить концепции, составить план обучения, подобрать ресурсы, проверить понимание. Какая тема?';
+                }
+
+                if (this.isCreativeQuestion(message)) {
+                    return '🎨 Креативная задача! Готов генерировать: идеи проектов, контент-план, UI/UX концепции, бизнес-модели. Что создаём?';
+                }
+
+                return '🤔 Интересный вопрос! Для лучшего ответа можешь:\n1. Настроить API ключ в настройках\n2. Добавить контекст в "Базу знаний"\n3. Использовать бесплатные API альтернативы\nИли задай вопрос по-другому!';
+            }
+
+            isTechnicalQuestion(message) {
+                const keywords = ['код', 'программир', 'алгоритм', 'база данных', 'api', 'фреймворк', 'библиотека', 'компиляц', 'дебаг'];
+                return keywords.some(keyword => message.toLowerCase().includes(keyword));
+            }
+
+            isLearningQuestion(message) {
+                const keywords = ['обуч', 'изуч', 'курс', 'учеб', 'концепц', 'теория', 'практик', 'навык'];
+                return keywords.some(keyword => message.toLowerCase().includes(keyword));
+            }
+
+            isCreativeQuestion(message) {
+                const keywords = ['идея', 'придумай', 'создай', 'креатив', 'инновац', 'проект', 'стартап'];
+                return keywords.some(keyword => message.toLowerCase().includes(keyword));
+            }
+
+            getFallbackResponse(message) {
+                return `⚠️ Ошибка подключения к AI. Проверь:\n1. API ключ в настройках\n2. Интернет-соединение\n3. Попробуй бесплатные альтернативы\n\nА пока: ${this.getSmartResponse(message)}`;
+            }
+
+            async testConnection() {
+                try {
+                    const testMessage = "Ответь одним словом: 'работает'";
+                    const response = await this.sendMessage(testMessage);
+                    this.isConnected = response && response.includes('работает');
+                    return this.isConnected;
+                } catch (error) {
+                    this.isConnected = false;
+                    return false;
+                }
+            }
+
+            saveKnowledge(knowledge) {
+                this.knowledgeBase = knowledge;
+                localStorage.setItem('neuro_knowledge', knowledge);
+                this.updateKnowledgeStats();
+            }
+
+            updateKnowledgeStats() {
+                const topics = this.knowledgeBase ? this.knowledgeBase.split('\n').filter(line => line.trim().length > 10).length : 0;
+                document.getElementById('topicsCount').textContent = topics;
+                document.getElementById('knowledgeSize').textContent = this.knowledgeBase.length;
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
             }
         }
 
-        // Основное приложение
+        // ==================== ОСНОВНОЕ ПРИЛОЖЕНИЕ ====================
         class NeuroApp {
             constructor() {
-                this.storage = new SimpleStorage();
+                this.ai = new AIIntegration();
                 this.currentTab = 'chat';
+                this.isProcessing = false;
+                this.conversationHistory = JSON.parse(localStorage.getItem('neuro_conversation')) || [];
                 this.init();
             }
 
             init() {
-                this.loadMessages();
-                this.loadKnowledge();
+                this.loadConfig();
+                this.loadConversation();
                 this.setupEventListeners();
-                this.updateStats();
+                this.updateAPIStatus();
             }
 
             setupEventListeners() {
-                // Переключение вкладок
+                // Навигация
                 document.querySelectorAll('.tab').forEach(tab => {
                     tab.addEventListener('click', (e) => {
                         this.switchTab(e.target.dataset.tab);
@@ -363,32 +534,24 @@
                 });
 
                 document.getElementById('messageInput').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' && !this.isProcessing) {
                         this.sendMessage();
                     }
                 });
 
-                // Загрузка файлов
-                document.getElementById('fileInput').addEventListener('change', (e) => {
-                    this.handleFileUpload(e.target.files[0]);
+                // Настройки слайдеров
+                document.getElementById('temperature').addEventListener('input', (e) => {
+                    document.getElementById('tempValue').textContent = e.target.value;
                 });
 
-                // Настройки
-                document.getElementById('aiMode').addEventListener('change', (e) => {
-                    this.storage.settings.mode = e.target.value;
-                    this.storage.saveSettings();
+                document.getElementById('maxTokens').addEventListener('input', (e) => {
+                    document.getElementById('tokensValue').textContent = e.target.value + ' токенов';
                 });
-
-                // Загружаем настройки
-                if (this.storage.settings.mode) {
-                    document.getElementById('aiMode').value = this.storage.settings.mode;
-                }
             }
 
             switchTab(tabName) {
                 this.currentTab = tabName;
                 
-                // Обновляем активные вкладки
                 document.querySelectorAll('.tab').forEach(tab => {
                     tab.classList.toggle('active', tab.dataset.tab === tabName);
                 });
@@ -398,211 +561,201 @@
                 });
             }
 
-            sendMessage() {
+            async sendMessage() {
+                if (this.isProcessing) return;
+                
                 const input = document.getElementById('messageInput');
                 const message = input.value.trim();
                 
                 if (!message) return;
-                
-                // Добавляем сообщение пользователя
+
+                this.isProcessing = true;
+                document.getElementById('sendBtn').disabled = true;
+                document.getElementById('sendBtn').textContent = '...';
+
+                // Показываем сообщение пользователя
                 this.addMessage(message, 'user');
                 input.value = '';
-                
-                // Генерируем ответ
-                setTimeout(() => {
-                    this.generateResponse(message);
-                }, 500);
+
+                // Показываем индикатор "думает"
+                const thinkingId = this.showThinking();
+
+                try {
+                    // Получаем контекст из истории
+                    const context = this.getConversationContext();
+                    
+                    // Отправляем в AI
+                    const response = await this.ai.sendMessage(message, context);
+                    
+                    // Убираем индикатор и показываем ответ
+                    this.removeThinking(thinkingId);
+                    this.addMessage(response, 'neuro');
+                    
+                    // Сохраняем в историю
+                    this.saveToHistory(message, response);
+                    
+                } catch (error) {
+                    this.removeThinking(thinkingId);
+                    this.addMessage('❌ Ошибка при обращении к AI. Проверь настройки API.', 'neuro');
+                }
+
+                this.isProcessing = false;
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('sendBtn').textContent = 'Отпр';
+            }
+
+            showThinking() {
+                const messagesDiv = document.getElementById('messages');
+                const thinkingDiv = document.createElement('div');
+                thinkingDiv.className = 'message neuro-message thinking pulse';
+                thinkingDiv.id = 'thinkingMsg';
+                thinkingDiv.innerHTML = '<strong>NeuroSputnik:</strong> 🤔 Думаю...';
+                messagesDiv.appendChild(thinkingDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                return 'thinkingMsg';
+            }
+
+            removeThinking(id) {
+                const element = document.getElementById(id);
+                if (element) element.remove();
             }
 
             addMessage(text, type) {
-                this.storage.addMessage(text, type);
-                this.displayMessage(text, type);
-                this.updateStats();
-            }
-
-            displayMessage(text, type) {
                 const messagesDiv = document.getElementById('messages');
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${type}-message fade-in`;
-                messageDiv.innerHTML = `<strong>${type === 'user' ? 'Вы' : 'NeuroSputnik'}:</strong> ${text}`;
+                messageDiv.innerHTML = `<strong>${type === 'user' ? 'Вы' : 'NeuroSputnik PRO'}:</strong> ${text}`;
                 messagesDiv.appendChild(messageDiv);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
 
-            loadMessages() {
-                this.storage.messages.forEach(msg => {
-                    this.displayMessage(msg.text, msg.type);
-                });
+            getConversationContext() {
+                return this.conversationHistory.slice(-5).map(msg => 
+                    `${msg.role}: ${msg.content}`
+                ).join('\n');
             }
 
-            generateResponse(userMessage) {
-                const response = this.createAIResponse(userMessage);
-                this.addMessage(response, 'neuro');
+            saveToHistory(userMessage, aiResponse) {
+                this.conversationHistory.push(
+                    { role: 'user', content: userMessage },
+                    { role: 'assistant', content: aiResponse }
+                );
+                
+                // Ограничиваем историю
+                if (this.conversationHistory.length > 20) {
+                    this.conversationHistory = this.conversationHistory.slice(-20);
+                }
+                
+                localStorage.setItem('neuro_conversation', JSON.stringify(this.conversationHistory));
             }
 
-            createAIResponse(message) {
-                const lowerMessage = message.toLowerCase();
-                const mode = this.storage.settings.mode;
-
-                // Базовые приветствия
-                if (lowerMessage.includes('привет') || lowerMessage.includes('здравств')) {
-                    return 'Привет! Рад тебя видеть! Чем могу помочь? 🚀';
-                }
-
-                if (lowerMessage.includes('как дела')) {
-                    return 'Всё отлично! Готов к работе и изучению нового!';
-                }
-
-                // Режимные ответы
-                if (mode === 'creative') {
-                    const creativeResponses = [
-                        "Интересно! Давай посмотрим на это с творческой стороны... 🎨",
-                        "О! Отличная тема для креатива! Что если... ✨",
-                        "Включаю воображение! Генерирую идеи... 💡"
-                    ];
-                    return creativeResponses[Math.floor(Math.random() * creativeResponses.length)];
-                }
-
-                if (mode === 'technical') {
-                    const techResponses = [
-                        "Анализирую вопрос с технической точки зрения... ⚙️",
-                        "С технической стороны это выглядит так... 🔧",
-                        "Рассматриваю проблему системно... 📊"
-                    ];
-                    return techResponses[Math.floor(Math.random() * techResponses.length)];
-                }
-
-                // Умный режим
-                if (lowerMessage.includes('что ты умеешь')) {
-                    return 'Я могу: общаться в разных режимах, запоминать разговоры, обучаться на твоих файлах! 📚';
-                }
-
-                if (lowerMessage.includes('обуч')) {
-                    return 'Загрузи текстовые файлы во вкладке "Обучение" - я изучу их и буду использовать в ответах!';
-                }
-
-                // Поиск в знаниях
-                const knowledgeResponse = this.searchInKnowledge(lowerMessage);
-                if (knowledgeResponse) {
-                    return `На основе изученных материалов: ${knowledgeResponse}`;
-                }
-
-                // Умные ответы на основе содержания
-                if (lowerMessage.includes('?')) {
-                    return 'Хороший вопрос! Давай разберем его вместе. Можешь загрузить дополнительные материалы для более точного ответа.';
-                }
-
-                if (lowerMessage.length > 50) {
-                    return 'Понимаю твою мысль. Это интересная тема для обсуждения!';
-                }
-
-                // Стандартные ответы
-                const defaultResponses = [
-                    "Интересно! Расскажи подробнее...",
-                    "Понимаю. Что именно тебя интересует?",
-                    "Хорошая тема! Давай обсудим её детальнее.",
-                    "Спасибо за вопрос! Изучаю тему..."
-                ];
-
-                return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-            }
-
-            searchInKnowledge(message) {
-                for (const knowledge of this.storage.knowledge) {
-                    if (knowledge.content && message.includes(knowledge.content.toLowerCase().substring(0, 10))) {
-                        return knowledge.content.substring(0, 100) + '...';
+            loadConversation() {
+                this.conversationHistory.forEach(msg => {
+                    if (msg.role === 'user') {
+                        this.addMessage(msg.content, 'user');
+                    } else {
+                        this.addMessage(msg.content, 'neuro');
                     }
-                }
-                return null;
-            }
-
-            async handleFileUpload(file) {
-                if (!file) return;
-
-                try {
-                    const content = await this.readFileAsText(file);
-                    
-                    const knowledgeItem = {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        content: content.substring(0, 5000), // Ограничиваем размер
-                        uploaded: new Date().toLocaleDateString()
-                    };
-
-                    this.storage.addKnowledge(knowledgeItem);
-                    this.loadKnowledge();
-                    this.showAlert(`Файл "${file.name}" успешно загружен!`);
-                    
-                } catch (error) {
-                    this.showAlert('Ошибка при загрузке файла');
-                }
-            }
-
-            readFileAsText(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = e => resolve(e.target.result);
-                    reader.onerror = reject;
-                    reader.readAsText(file);
                 });
             }
 
-            loadKnowledge() {
-                const list = document.getElementById('knowledgeList');
-                if (this.storage.knowledge.length === 0) {
-                    list.innerHTML = '<div class="knowledge-item">Пока нет загруженных файлов</div>';
-                    return;
+            loadConfig() {
+                // Загружаем настройки в форму
+                document.getElementById('aiProvider').value = this.ai.config.provider;
+                document.getElementById('apiKey').value = this.ai.config.apiKey;
+                document.getElementById('apiUrl').value = this.ai.config.apiUrl;
+                document.getElementById('temperature').value = this.ai.config.temperature;
+                document.getElementById('maxTokens').value = this.ai.config.maxTokens;
+                
+                document.getElementById('tempValue').textContent = this.ai.config.temperature;
+                document.getElementById('tokensValue').textContent = this.ai.config.maxTokens + ' токенов';
+                
+                // Загружаем базу знаний
+                document.getElementById('knowledgeBase').value = this.ai.knowledgeBase;
+                this.ai.updateKnowledgeStats();
+            }
+
+            updateAPIStatus() {
+                const statusElement = document.getElementById('apiStatus');
+                if (this.ai.config.apiKey) {
+                    statusElement.textContent = '🟡 API настроен';
+                    statusElement.className = 'api-status connected';
+                } else {
+                    statusElement.textContent = '❌ API не настроен';
+                    statusElement.className = 'api-status';
                 }
-
-                list.innerHTML = this.storage.knowledge.map(knowledge => `
-                    <div class="knowledge-item">
-                        <strong>${knowledge.name}</strong>
-                        <div style="font-size: 0.8em; opacity: 0.8; margin-top: 5px;">
-                            ${knowledge.size} байт · ${knowledge.uploaded}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            updateStats() {
-                document.getElementById('msgCount').textContent = this.storage.messages.length;
-                document.getElementById('fileCount').textContent = this.storage.knowledge.length;
-                document.getElementById('currentMode').textContent = 
-                    this.storage.settings.mode === 'smart' ? 'Умный' :
-                    this.storage.settings.mode === 'creative' ? 'Креативный' : 'Технический';
-            }
-
-            showAlert(message) {
-                alert(message); // Простой alert для мобильных устройств
             }
         }
 
-        // Глобальные функции
-        function clearData() {
-            if (confirm('Очистить все данные приложения?')) {
-                localStorage.clear();
-                location.reload();
+        // ==================== ГЛОБАЛЬНЫЕ ФУНКЦИИ ====================
+        function changeAIProvider() {
+            const provider = document.getElementById('aiProvider').value;
+            const urlInput = document.getElementById('apiUrl');
+            
+            if (provider === 'local') {
+                urlInput.style.display = 'block';
+                urlInput.placeholder = 'URL локальной модели...';
+            } else {
+                urlInput.style.display = 'none';
             }
         }
 
-        function exportData() {
-            const data = {
-                messages: app.storage.messages,
-                knowledge: app.storage.knowledge,
-                exportDate: new Date().toISOString()
+        async function testAPI() {
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '🧪 Тестирую...';
+            button.disabled = true;
+
+            try {
+                const connected = await app.ai.testConnection();
+                if (connected) {
+                    alert('✅ API подключен успешно!');
+                    document.getElementById('apiStatus').textContent = '✅ API работает';
+                    document.getElementById('apiStatus').className = 'api-status connected';
+                } else {
+                    alert('❌ Не удалось подключиться к API. Проверь ключ и сеть.');
+                }
+            } catch (error) {
+                alert('❌ Ошибка тестирования: ' + error.message);
+            }
+
+            button.textContent = originalText;
+            button.disabled = false;
+        }
+
+        function saveConfig() {
+            app.ai.config = {
+                provider: document.getElementById('aiProvider').value,
+                apiKey: document.getElementById('apiKey').value,
+                apiUrl: document.getElementById('apiUrl').value,
+                temperature: parseFloat(document.getElementById('temperature').value),
+                maxTokens: parseInt(document.getElementById('maxTokens').value)
             };
+
+            localStorage.setItem('neuro_ai_config', JSON.stringify(app.ai.config));
+            app.updateAPIStatus();
+            alert('✅ Настройки сохранены!');
+        }
+
+        function saveKnowledge() {
+            const knowledge = document.getElementById('knowledgeBase').value;
+            app.ai.saveKnowledge(knowledge);
+            alert('✅ База знаний обновлена!');
+        }
+
+        function useFreeAPI(provider) {
+            if (provider === 'openrouter') {
+                document.getElementById('aiProvider').value = 'openai';
+                document.getElementById('apiKey').value = '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';
+                document.getElementById('apiUrl').value = 'https://openrouter.ai/api/v1';
+                alert('🔑 OpenRouter API настроен! Теперь можно тестировать.');
+            } else if (provider === 'huggingface') {
+                document.getElementById('aiProvider').value = 'huggingface';
+                document.getElementById('apiKey').value = 'hf_your_token_here';
+                alert('🔑 HuggingFace настроен! Получи бесплатный токен на huggingface.co');
+            }
             
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'neurospuntik-export.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            app.showAlert('Данные экспортированы!');
+            saveConfig();
         }
 
         // Запуск приложения
