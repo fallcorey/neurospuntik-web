@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroSputnik 🧠 - Ваш AI Спутник</title>
+    <title>NeuroSputnik 🧠 - AI Спутник</title>
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Ваш персональный AI спутник с обучением">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
     <style>
+        /* Базовые стили */
         * {
             margin: 0;
             padding: 0;
@@ -12,114 +17,101 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            min-height: 100vh;
-            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 20px;
-            height: 95vh;
-        }
-
-        /* Стили чата */
-        .chat-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
+        .app-container {
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .chat-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .chat-header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .mode-selector {
+        /* Навигация */
+        .nav-tabs {
             display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            gap: 5px;
         }
 
-        .mode-btn {
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50px;
+        .nav-tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 15px;
             color: white;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-weight: bold;
         }
 
-        .mode-btn:hover {
+        .nav-tab.active {
             background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
 
-        .mode-btn.active {
-            background: rgba(255, 255, 255, 0.4);
-            border-color: white;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
-        }
-
-        .messages {
+        /* Контейнеры вкладок */
+        .tab-content {
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Чат */
+        .chat-messages {
+            flex: 1;
             padding: 20px;
-            margin-bottom: 20px;
             overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .message {
-            margin: 15px 0;
-            padding: 15px;
-            border-radius: 15px;
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
             animation: fadeIn 0.3s ease;
         }
 
         .user-message {
-            background: rgba(255, 255, 255, 0.15);
-            border-left: 4px solid #4CAF50;
-            margin-left: 20%;
+            align-self: flex-end;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-bottom-right-radius: 5px;
         }
 
         .neuro-message {
-            background: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid #2196F3;
-            margin-right: 20%;
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.15);
+            border-bottom-left-radius: 5px;
         }
 
         .input-area {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.1);
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         #messageInput {
             flex: 1;
-            padding: 15px 20px;
+            padding: 12px 18px;
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50px;
+            border-radius: 25px;
             color: white;
             font-size: 16px;
         }
@@ -128,87 +120,63 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
-        #messageInput:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        #sendBtn {
-            padding: 15px 30px;
+        .send-btn {
+            padding: 12px;
             background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
             border: none;
-            border-radius: 50px;
+            border-radius: 50%;
             color: white;
-            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        #sendBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Стили панели персонажа */
-        .character-panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .character-display {
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            margin-bottom: 20px;
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            overflow: hidden;
         }
 
-        .character-svg {
-            width: 150px;
-            height: 150px;
-            transition: all 0.3s ease;
+        /* Обучение */
+        .training-section {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
         }
 
-        .character-info {
+        .file-upload {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
             margin-bottom: 20px;
         }
 
-        .character-name {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            font-weight: bold;
+        .knowledge-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .character-description {
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.5;
-        }
-
-        .stats-panel {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .stat-item {
+        .knowledge-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Настройки */
+        .settings-section {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .setting-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
             margin-bottom: 10px;
-            font-size: 0.9em;
         }
 
         /* Анимации */
@@ -217,9 +185,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .pulse {
+            animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
@@ -227,366 +194,503 @@
             50% { opacity: 0.7; }
         }
 
-        .thinking {
-            animation: pulse 1.5s infinite;
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            animation: slideDown 0.3s ease;
         }
 
-        .bounce {
-            animation: bounce 2s infinite;
-        }
-
-        /* Адаптивность */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                height: auto;
-            }
-            
-            .character-panel {
-                order: -1;
-            }
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Основной чат -->
-        <div class="chat-container">
-            <div class="chat-header">
-                <h1>🧠 NeuroSputnik</h1>
-                <p>Ваш персональный AI-спутник</p>
-            </div>
+    <div class="app-container">
+        <!-- Навигация -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="chat">💬 Чат</button>
+            <button class="nav-tab" data-tab="training">📚 Обучение</button>
+            <button class="nav-tab" data-tab="memory">🧠 Память</button>
+            <button class="nav-tab" data-tab="settings">⚙️ Настройки</button>
+        </div>
 
-            <div class="mode-selector">
-                <button class="mode-btn active" data-mode="normal">🧠 Обычный</button>
-                <button class="mode-btn" data-mode="creative">🎨 Креатив</button>
-                <button class="mode-btn" data-mode="technical">⚡ Технический</button>
-                <button class="mode-btn" data-mode="friendly">😊 Дружеский</button>
-            </div>
-
-            <div class="messages" id="messages">
+        <!-- Вкладка Чат -->
+        <div class="tab-content active" id="chat">
+            <div class="chat-messages" id="chatMessages">
                 <div class="message neuro-message">
-                    <strong>NeuroSputnik:</strong> Привет! Я твой AI-спутник. Выбери режим общения и начни вводить сообщения! 🚀
+                    <strong>NeuroSputnik:</strong> Привет! Я твой AI-спутник. Обучи меня своими знаниями для лучших ответов! 🚀
                 </div>
             </div>
-
             <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Введите ваше сообщение...">
-                <button id="sendBtn">Отправить</button>
+                <input type="text" id="messageInput" placeholder="Введите сообщение...">
+                <button class="send-btn" id="sendBtn">↑</button>
             </div>
         </div>
 
-        <!-- Панель персонажа -->
-        <div class="character-panel">
-            <div class="character-display" id="characterDisplay">
-                <!-- SVG персонажи будут добавляться через JavaScript -->
-            </div>
-            
-            <div class="character-info">
-                <div class="character-name" id="characterName">Нейро-Спутник</div>
-                <div class="character-description" id="characterDescription">
-                    Ваш умный помощник. Готов к общению и обучению!
+        <!-- Вкладка Обучение -->
+        <div class="tab-content" id="training">
+            <div class="training-section">
+                <div class="file-upload" id="fileUpload">
+                    <h3>📁 Загрузите знания</h3>
+                    <p>Перетащите сюда файлы или нажмите для выбора</p>
+                    <input type="file" id="fileInput" multiple accept=".txt,.pdf,.docx" style="display: none;">
+                    <button onclick="document.getElementById('fileInput').click()" style="margin-top: 10px; padding: 10px 20px; background: rgba(255,255,255,0.2); border: none; border-radius: 10px; color: white;">Выбрать файлы</button>
+                </div>
+                <div class="knowledge-list" id="knowledgeList">
+                    <!-- Список загруженных знаний -->
                 </div>
             </div>
+        </div>
 
-            <div class="stats-panel">
-                <div class="stat-item">
-                    <span>Режим:</span>
-                    <span id="currentMode">Обычный</span>
+        <!-- Вкладка Память -->
+        <div class="tab-content" id="memory">
+            <div class="training-section">
+                <h3>🎯 Статистика памяти</h3>
+                <div class="setting-item">
+                    <div>Изучено документов: <span id="docCount">0</span></div>
+                    <div>Сообщений в памяти: <span id="msgCount">1</span></div>
+                    <div>Размер базы знаний: <span id="dbSize">0 KB</span></div>
                 </div>
-                <div class="stat-item">
-                    <span>Сообщений:</span>
-                    <span id="messageCount">1</span>
+                
+                <h3 style="margin-top: 20px;">📊 Темы обучения</h3>
+                <div id="topicsList">
+                    <!-- Список изученных тем -->
                 </div>
-                <div class="stat-item">
-                    <span>Настроение:</span>
-                    <span id="moodStatus">😊 Радостное</span>
+            </div>
+        </div>
+
+        <!-- Вкладка Настройки -->
+        <div class="tab-content" id="settings">
+            <div class="settings-section">
+                <div class="setting-item">
+                    <h3>🔧 Режим работы</h3>
+                    <select id="aiMode" style="width: 100%; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                        <option value="fast">Быстрый режим</option>
+                        <option value="quality">Качественный режим</option>
+                        <option value="creative">Креативный режим</option>
+                    </select>
                 </div>
-                <div class="stat-item">
-                    <span>Уровень:</span>
-                    <span id="levelStatus">Новичок</span>
+                
+                <div class="setting-item">
+                    <h3>💾 Хранилище</h3>
+                    <button onclick="clearData()" style="width: 100%; padding: 12px; background: rgba(255,100,100,0.3); border: none; border-radius: 10px; color: white; margin-bottom: 10px;">Очистить данные</button>
+                    <button onclick="exportData()" style="width: 100%; padding: 12px; background: rgba(100,255,100,0.3); border: none; border-radius: 10px; color: white;">Экспорт знаний</button>
+                </div>
+                
+                <div class="setting-item">
+                    <h3>📲 Установка</h3>
+                    <button onclick="installApp()" id="installBtn" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.2); border: none; border-radius: 10px; color: white;">Установить приложение</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== КОНФИГУРАЦИЯ ====================
-        const CONFIG = {
-            characters: {
-                normal: { name: "Нейро-Спутник", color: "#2196F3", emoji: "🧠" },
-                creative: { name: "Креативный Гений", color: "#9C27B0", emoji: "🎨" },
-                technical: { name: "Технический Эксперт", color: "#FF9800", emoji: "⚡" },
-                friendly: { name: "Дружеский Помощник", color: "#4CAF50", emoji: "😊" }
-            },
-            responses: {
-                normal: [
-                    "Интересный вопрос! Давайте разберем его подробнее...",
-                    "Анализирую вашу просьбу... Могу предложить несколько решений.",
-                    "Отличная тема для обсуждения! Что именно вас интересует?",
-                    "Понимаю ваш запрос. Давайте изучим этот вопрос глубже."
-                ],
-                creative: [
-                    "О! Интересная задача! Давай придумаем что-то необычное... ✨",
-                    "Включаю креативный режим! Генерирую инновационные идеи...",
-                    "Что если посмотреть на это под другим углом? Например...",
-                    "Креативный вызов принят! Рождаю уникальные концепции..."
-                ],
-                technical: [
-                    "Анализирую технические аспекты... Провожу детальный разбор.",
-                    "С точки зрения архитектуры оптимальным решением будет...",
-                    "Технический анализ завершен. Рекомендую следующий подход:",
-                    "Изучаю проблему на системном уровне. Вот мои выводы..."
-                ],
-                friendly: [
-                    "Привет! Рад тебя видеть! Как твои дела? 🌟",
-                    "Как здорово, что ты написал! О чем хочешь поговорить?",
-                    "Всегда готов поддержать беседу! Что у тебя нового?",
-                    "Так приятно общаться с тобой! Расскажи, что на душе?"
-                ]
-            }
-        };
-
-        // ==================== SVG ПЕРСОНАЖИ ====================
-        const CHARACTERS_SVG = {
-            normal: `
-                <svg class="character-svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="40" r="25" fill="#2196F3" stroke="white" stroke-width="2"/>
-                    <circle cx="40" cy="35" r="5" fill="white"/>
-                    <circle cx="60" cy="35" r="5" fill="white"/>
-                    <path d="M 40 50 Q 50 60 60 50" stroke="white" stroke-width="2" fill="none"/>
-                    <circle cx="50" cy="70" r="15" fill="#2196F3" stroke="white" stroke-width="2"/>
-                </svg>
-            `,
-            creative: `
-                <svg class="character-svg" viewBox="0 0 100 100">
-                    <path d="M 30 30 L 70 30 L 85 50 L 70 70 L 30 70 L 15 50 Z" fill="#9C27B0" stroke="white" stroke-width="2"/>
-                    <circle cx="40" cy="45" r="8" fill="white"/>
-                    <circle cx="60" cy="45" r="8" fill="white"/>
-                    <path d="M 35 60 Q 50 70 65 60" stroke="white" stroke-width="2" fill="none"/>
-                    <circle cx="75" cy="35" r="5" fill="#FFEB3B"/>
-                    <circle cx="25" cy="35" r="3" fill="#FFEB3B"/>
-                </svg>
-            `,
-            technical: `
-                <svg class="character-svg" viewBox="0 0 100 100">
-                    <rect x="25" y="25" width="50" height="50" rx="10" fill="#FF9800" stroke="white" stroke-width="2"/>
-                    <circle cx="40" cy="40" r="5" fill="white"/>
-                    <circle cx="60" cy="40" r="5" fill="white"/>
-                    <rect x="35" y="55" width="30" height="5" fill="white"/>
-                    <rect x="30" y="65" width="40" height="3" fill="white"/>
-                    <circle cx="50" cy="75" r="2" fill="white"/>
-                </svg>
-            `,
-            friendly: `
-                <svg class="character-svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" fill="#4CAF50" stroke="white" stroke-width="2"/>
-                    <circle cx="35" cy="40" r="6" fill="white"/>
-                    <circle cx="65" cy="40" r="6" fill="white"/>
-                    <path d="M 35 65 Q 50 75 65 65" stroke="white" stroke-width="3" fill="none"/>
-                    <circle cx="45" cy="35" r="2" fill="#333"/>
-                    <circle cx="55" cy="35" r="2" fill="#333"/>
-                </svg>
-            `
-        };
-
-        // ==================== ОСНОВНОЙ КОД ====================
-        class NeuroSputnik {
+        // ==================== БАЗА ДАННЫХ ====================
+        class NeuroDatabase {
             constructor() {
-                this.currentMode = 'normal';
-                this.messageCount = 1;
-                this.mood = 'happy';
-                this.level = 'novice';
+                this.dbName = 'NeuroSputnikDB';
+                this.version = 1;
                 this.init();
             }
 
-            init() {
+            async init() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.version);
+                    
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => {
+                        this.db = request.result;
+                        resolve(this.db);
+                    };
+                    
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        
+                        // Таблица сообщений
+                        if (!db.objectStoreNames.contains('messages')) {
+                            const messagesStore = db.createObjectStore('messages', { keyPath: 'id', autoIncrement: true });
+                            messagesStore.createIndex('timestamp', 'timestamp', { unique: false });
+                        }
+                        
+                        // Таблица знаний
+                        if (!db.objectStoreNames.contains('knowledge')) {
+                            const knowledgeStore = db.createObjectStore('knowledge', { keyPath: 'id', autoIncrement: true });
+                            knowledgeStore.createIndex('type', 'type', { unique: false });
+                        }
+                        
+                        // Таблица настроек
+                        if (!db.objectStoreNames.contains('settings')) {
+                            db.createObjectStore('settings', { keyPath: 'key' });
+                        }
+                    };
+                });
+            }
+
+            async addMessage(message) {
+                const transaction = this.db.transaction(['messages'], 'readwrite');
+                const store = transaction.objectStore('messages');
+                return store.add({
+                    ...message,
+                    timestamp: Date.now()
+                });
+            }
+
+            async getMessages(limit = 50) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction(['messages'], 'readonly');
+                    const store = transaction.objectStore('messages');
+                    const index = store.index('timestamp');
+                    const request = index.openCursor(null, 'prev');
+                    const messages = [];
+                    
+                    request.onsuccess = (event) => {
+                        const cursor = event.target.result;
+                        if (cursor && messages.length < limit) {
+                            messages.push(cursor.value);
+                            cursor.continue();
+                        } else {
+                            resolve(messages.reverse());
+                        }
+                    };
+                    
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async addKnowledge(knowledge) {
+                const transaction = this.db.transaction(['knowledge'], 'readwrite');
+                const store = transaction.objectStore('knowledge');
+                return store.add({
+                    ...knowledge,
+                    created: Date.now()
+                });
+            }
+
+            async getKnowledge() {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction(['knowledge'], 'readonly');
+                    const store = transaction.objectStore('knowledge');
+                    const request = store.getAll();
+                    
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        }
+
+        // ==================== ОСНОВНОЕ ПРИЛОЖЕНИЕ ====================
+        class NeuroSputnikApp {
+            constructor() {
+                this.db = new NeuroDatabase();
+                this.currentTab = 'chat';
+                this.knowledgeBase = [];
+                this.init();
+            }
+
+            async init() {
+                await this.db.init();
+                this.loadMessages();
+                this.loadKnowledge();
                 this.bindEvents();
-                this.updateCharacter('normal');
-                this.updateStats();
+                this.registerSW();
             }
 
             bindEvents() {
-                // Кнопки режимов
-                document.querySelectorAll('.mode-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        this.changeMode(e.target.dataset.mode);
+                // Навигация
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        this.switchTab(e.target.dataset.tab);
                     });
                 });
 
-                // Отправка сообщения
+                // Отправка сообщений
                 document.getElementById('sendBtn').addEventListener('click', () => {
                     this.sendMessage();
                 });
 
-                // Enter для отправки
                 document.getElementById('messageInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         this.sendMessage();
                     }
                 });
-            }
 
-            changeMode(mode) {
-                this.currentMode = mode;
-                
-                // Обновляем активную кнопку
-                document.querySelectorAll('.mode-btn').forEach(btn => {
-                    btn.classList.remove('active');
+                // Загрузка файлов
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    this.handleFiles(e.target.files);
                 });
-                document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
-                
-                // Обновляем персонажа
-                this.updateCharacter(mode);
-                
-                // Обновляем статистику
-                this.updateStats();
-                
-                // Добавляем сообщение о смене режима
-                this.addMessage(`Режим изменен на: ${CONFIG.characters[mode].name}`, 'neuro');
+
+                // Drag and drop
+                const fileUpload = document.getElementById('fileUpload');
+                fileUpload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    fileUpload.style.background = 'rgba(255,255,255,0.2)';
+                });
+
+                fileUpload.addEventListener('dragleave', () => {
+                    fileUpload.style.background = '';
+                });
+
+                fileUpload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fileUpload.style.background = '';
+                    this.handleFiles(e.dataTransfer.files);
+                });
             }
 
-            updateCharacter(mode) {
-                const characterDisplay = document.getElementById('characterDisplay');
-                const characterName = document.getElementById('characterName');
-                const characterDescription = document.getElementById('characterDescription');
+            switchTab(tabName) {
+                this.currentTab = tabName;
                 
-                characterDisplay.innerHTML = CHARACTERS_SVG[mode];
-                characterName.textContent = CONFIG.characters[mode].name;
-                characterDescription.textContent = this.getCharacterDescription(mode);
+                // Обновляем активные кнопки
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                });
                 
-                // Анимация смены персонажа
-                characterDisplay.classList.add('bounce');
-                setTimeout(() => {
-                    characterDisplay.classList.remove('bounce');
-                }, 1000);
+                // Показываем активную вкладку
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.toggle('active', content.id === tabName);
+                });
             }
 
-            getCharacterDescription(mode) {
-                const descriptions = {
-                    normal: "Аналитический помощник. Глубоко анализирует вопросы и предлагает взвешенные решения.",
-                    creative: "Генератор идей. Превращает обычные мысли в необычные концепции и проекты.",
-                    technical: "Технический эксперт. Разбирает сложные задачи на составляющие и находит оптимальные пути.",
-                    friendly: "Эмоциональный компаньон. Поддерживает, вдохновляет и создает позитивную атмосферу."
-                };
-                return descriptions[mode];
-            }
-
-            sendMessage() {
+            async sendMessage() {
                 const input = document.getElementById('messageInput');
                 const message = input.value.trim();
                 
                 if (!message) return;
                 
                 // Добавляем сообщение пользователя
-                this.addMessage(message, 'user');
+                await this.addMessage(message, 'user');
                 input.value = '';
                 
-                // Показываем индикатор "думаю"
-                this.showThinking();
-                
-                // Имитируем задержку ответа
+                // Генерируем ответ
                 setTimeout(() => {
-                    this.generateResponse(message);
-                }, 1000 + Math.random() * 2000);
+                    this.generateAIResponse(message);
+                }, 500);
             }
 
-            showThinking() {
-                const messagesDiv = document.getElementById('messages');
-                const thinkingMsg = document.createElement('div');
-                thinkingMsg.className = 'message neuro-message thinking';
-                thinkingMsg.innerHTML = `<strong>NeuroSputnik:</strong> Думаю... ${CONFIG.characters[this.currentMode].emoji}`;
-                thinkingMsg.id = 'thinkingMsg';
-                messagesDiv.appendChild(thinkingMsg);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            async addMessage(text, type) {
+                const message = {
+                    text,
+                    type,
+                    timestamp: Date.now()
+                };
+                
+                await this.db.addMessage(message);
+                this.displayMessage(message);
             }
 
-            generateResponse(userMessage) {
-                // Убираем индикатор "думаю"
-                const thinkingMsg = document.getElementById('thinkingMsg');
-                if (thinkingMsg) thinkingMsg.remove();
-                
-                // Выбираем случайный ответ из подходящего режима
-                const responses = CONFIG.responses[this.currentMode];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                
-                // Добавляем персонализированный ответ
-                let response = randomResponse;
-                
-                // Простая логика ответов на основе ключевых слов
-                const lowerMessage = userMessage.toLowerCase();
-                
-                if (lowerMessage.includes('привет') || lowerMessage.includes('здравств')) {
-                    response = `${CONFIG.characters[this.currentMode].emoji} Привет! Рад тебя видеть! ` + response;
-                }
-                
-                if (lowerMessage.includes('как дела') || lowerMessage.includes('как ты')) {
-                    response = `У меня всё отлично! ${response}`;
-                }
-                
-                if (lowerMessage.includes('спасибо')) {
-                    response = `Пожалуйста! Всегда рад помочь! ${response}`;
-                }
-                
-                // Добавляем ответ в чат
-                this.addMessage(response, 'neuro');
-                
-                // Обновляем статистику
-                this.messageCount++;
-                this.updateStats();
-                
-                // Меняем настроение случайным образом
-                this.changeMood();
-            }
-
-            addMessage(text, type) {
-                const messagesDiv = document.getElementById('messages');
+            displayMessage(message) {
+                const messagesDiv = document.getElementById('chatMessages');
                 const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${type}-message`;
-                messageDiv.innerHTML = `<strong>${type === 'user' ? 'Вы' : 'NeuroSputnik'}:</strong> ${text}`;
+                messageDiv.className = `message ${message.type}-message`;
+                messageDiv.innerHTML = `<strong>${message.type === 'user' ? 'Вы' : 'NeuroSputnik'}:</strong> ${message.text}`;
                 messagesDiv.appendChild(messageDiv);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
 
-            changeMood() {
-                const moods = [
-                    { mood: 'happy', text: '😊 Радостное', chance: 0.6 },
-                    { mood: 'excited', text: '🎉 Восторженное', chance: 0.2 },
-                    { mood: 'thoughtful', text: '🤔 Задумчивое', chance: 0.15 },
-                    { mood: 'playful', text: '😄 Игривое', chance: 0.05 }
-                ];
+            async loadMessages() {
+                const messages = await this.db.getMessages();
+                messages.forEach(msg => this.displayMessage(msg));
+            }
+
+            generateAIResponse(userMessage) {
+                // Интеллектуальная генерация ответа на основе знаний
+                const response = this.generateIntelligentResponse(userMessage);
+                this.addMessage(response, 'neuro');
+                this.updateStats();
+            }
+
+            generateIntelligentResponse(message) {
+                const lowerMessage = message.toLowerCase();
                 
-                const random = Math.random();
-                let cumulative = 0;
+                // Поиск в базе знаний
+                const knowledgeMatch = this.findInKnowledge(lowerMessage);
+                if (knowledgeMatch) {
+                    return `На основе изученных материалов: ${knowledgeMatch}`;
+                }
                 
-                for (const mood of moods) {
-                    cumulative += mood.chance;
-                    if (random <= cumulative) {
-                        this.mood = mood.mood;
-                        document.getElementById('moodStatus').textContent = mood.text;
-                        break;
+                // Базовые ответы
+                if (lowerMessage.includes('привет')) {
+                    return 'Привет! Рад тебя видеть! Чем могу помочь? 🚀';
+                }
+                
+                if (lowerMessage.includes('как дела')) {
+                    return 'Всё отлично! Готов к работе и изучению нового!';
+                }
+                
+                if (lowerMessage.includes('спасибо')) {
+                    return 'Всегда рад помочь! Продолжаем учиться вместе! ✨';
+                }
+                
+                // Анализ типа запроса
+                if (this.isTechnicalQuestion(lowerMessage)) {
+                    return 'Это интересный технический вопрос! Давайте разберем его подробнее...';
+                }
+                
+                if (this.isCreativeQuestion(lowerMessage)) {
+                    return 'Отличная тема для креативного подхода! Давайте brainstorm...';
+                }
+                
+                return 'Интересный вопрос! Можете загрузить материалы по этой теме для более точного ответа.';
+            }
+
+            findInKnowledge(message) {
+                for (const knowledge of this.knowledgeBase) {
+                    if (knowledge.content && message.includes(knowledge.content.toLowerCase().substring(0, 20))) {
+                        return knowledge.content.substring(0, 150) + '...';
                     }
                 }
+                return null;
+            }
+
+            isTechnicalQuestion(message) {
+                const techKeywords = ['как сделать', 'программир', 'код', 'алгоритм', 'техническ'];
+                return techKeywords.some(keyword => message.includes(keyword));
+            }
+
+            isCreativeQuestion(message) {
+                const creativeKeywords = ['идея', 'придумай', 'создай', 'креатив', 'инновац'];
+                return creativeKeywords.some(keyword => message.includes(keyword));
+            }
+
+            async handleFiles(files) {
+                for (let file of files) {
+                    await this.processFile(file);
+                }
+                this.showNotification(`Загружено ${files.length} файлов`);
+            }
+
+            async processFile(file) {
+                const content = await this.readFileContent(file);
+                
+                const knowledge = {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    content: content.substring(0, 10000), // Ограничиваем размер
+                    uploaded: Date.now()
+                };
+                
+                await this.db.addKnowledge(knowledge);
+                this.knowledgeBase.push(knowledge);
+                this.updateKnowledgeList();
+            }
+
+            readFileContent(file) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsText(file);
+                });
+            }
+
+            async loadKnowledge() {
+                this.knowledgeBase = await this.db.getKnowledge();
+                this.updateKnowledgeList();
+            }
+
+            updateKnowledgeList() {
+                const list = document.getElementById('knowledgeList');
+                list.innerHTML = this.knowledgeBase.map(knowledge => `
+                    <div class="knowledge-item">
+                        <div>
+                            <strong>${knowledge.name}</strong>
+                            <div style="font-size: 0.8em; opacity: 0.8;">${knowledge.size} bytes</div>
+                        </div>
+                        <button onclick="app.deleteKnowledge(${knowledge.id})" style="background: rgba(255,100,100,0.3); border: none; border-radius: 5px; color: white; padding: 5px 10px;">×</button>
+                    </div>
+                `).join('');
             }
 
             updateStats() {
-                document.getElementById('currentMode').textContent = CONFIG.characters[this.currentMode].name;
-                document.getElementById('messageCount').textContent = this.messageCount;
+                document.getElementById('docCount').textContent = this.knowledgeBase.length;
+                document.getElementById('msgCount').textContent = document.querySelectorAll('.message').length;
+                document.getElementById('dbSize').textContent = this.calculateDBSize();
+            }
+
+            calculateDBSize() {
+                const total = this.knowledgeBase.reduce((sum, k) => sum + (k.content?.length || 0), 0);
+                return Math.round(total / 1024) + ' KB';
+            }
+
+            showNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                document.body.appendChild(notification);
                 
-                // Обновляем уровень на основе количества сообщений
-                if (this.messageCount >= 50) this.level = 'Эксперт';
-                else if (this.messageCount >= 20) this.level = 'Опытный';
-                else if (this.messageCount >= 10) this.level = 'Ученик';
-                else this.level = 'Новичок';
-                
-                document.getElementById('levelStatus').textContent = this.level;
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+
+            async registerSW() {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        await navigator.serviceWorker.register('/sw.js');
+                        console.log('SW registered');
+                    } catch (error) {
+                        console.log('SW registration failed:', error);
+                    }
+                }
             }
         }
 
-        // ==================== ЗАПУСК ПРИЛОЖЕНИЯ ====================
-        document.addEventListener('DOMContentLoaded', () => {
-            window.neuroSputnik = new NeuroSputnik();
+        // ==================== PWA ФУНКЦИИ ====================
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'block';
         });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted install');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        function clearData() {
+            if (confirm('Очистить все данные?')) {
+                indexedDB.deleteDatabase('NeuroSputnikDB');
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function exportData() {
+            const data = {
+                knowledge: app.knowledgeBase,
+                timestamp: Date.now()
+            };
+            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'neurospuntik-backup.json';
+            a.click();
+        }
+
+        // Запуск приложения
+        const app = new NeuroSputnikApp();
+        window.app = app;
     </script>
 </body>
 </html>
