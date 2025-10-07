@@ -1,0 +1,53 @@
+name: Build Android APK from PWA
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install PWA to APK tools
+      run: |
+        npm install -g pwa-to-apk
+        npm install -g http-server
+        
+    - name: Build PWA assets
+      run: |
+        mkdir -p dist
+        cp -r *.html *.js *.json ollama-engine/ games/ learning/ resources/ dist/
+        
+    - name: Generate APK from PWA
+      run: |
+        cd dist
+        pwa-to-apk \
+          --name "NeuroSputnik AI" \
+          --package "com.neurosputnik.android" \
+          --icon "resources/icons/icon-192.png" \
+          --url "https://your-username.github.io/neuro-sputnik-android/" \
+          --output ../neuro-sputnik.apk
+          
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: neuro-sputnik-apk
+        path: neuro-sputnik.apk
+        retention-days: 30
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
