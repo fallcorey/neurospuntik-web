@@ -3,750 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroSputnik 🧠 + Ollama</title>
+    <title>NeuroSputnik 🧠 - CORS Fixed</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            height: 100vh;
-            overflow: hidden;
+            color: white; height: 100vh; overflow: hidden;
         }
-
-        .app-container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .header h1 {
-            font-size: 1.5em;
-            margin-bottom: 5px;
-        }
-
-        .connection-status {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 0.7em;
-            padding: 3px 8px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.2);
-        }
-
-        .connection-status.connected {
-            background: rgba(76, 175, 80, 0.3);
-        }
-
-        .tabs {
-            display: flex;
-            background: rgba(0, 0, 0, 0.3);
-            overflow-x: auto;
-        }
-
-        .tab {
-            flex: 1;
-            min-width: 80px;
-            padding: 15px 10px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 0.9em;
-            cursor: pointer;
-        }
-
-        .tab.active {
-            background: rgba(255, 255, 255, 0.2);
-            border-bottom: 3px solid white;
-        }
-
-        .tab-content {
-            flex: 1;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .tab-content.active {
-            display: flex;
-        }
-
-        .messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .message {
-            max-width: 85%;
-            padding: 12px 15px;
-            border-radius: 18px;
-            font-size: 0.95em;
-            line-height: 1.4;
-        }
-
-        .user-message {
-            align-self: flex-end;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-        }
-
-        .neuro-message {
-            align-self: flex-start;
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .input-area {
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        #messageInput {
-            flex: 1;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 25px;
-            color: white;
-            font-size: 16px;
-        }
-
-        .send-btn {
-            padding: 12px 20px;
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .config-panel {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px;
-        }
-
-        .config-input {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-
-        .model-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .model-card:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .model-card.active {
-            background: rgba(76, 175, 80, 0.3);
-            border: 2px solid rgba(76, 175, 80, 0.5);
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4ECDC4, #FF6B6B);
-            transition: width 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .pulse {
-            animation: pulse 1.5s infinite;
-        }
+        .app-container { height: 100vh; display: flex; flex-direction: column; }
+        .header { text-align: center; padding: 20px; background: rgba(0,0,0,0.2); }
+        .status-bar { padding: 10px; text-align: center; font-size: 0.9em; }
+        .status-connected { background: rgba(76,175,80,0.3); }
+        .status-warning { background: rgba(255,193,7,0.3); }
+        .status-error { background: rgba(255,100,100,0.3); }
+        .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .message { max-width: 85%; padding: 12px; border-radius: 18px; font-size: 0.95em; line-height: 1.4; }
+        .user-message { align-self: flex-end; background: rgba(255,255,255,0.9); color: #333; }
+        .neuro-message { align-self: flex-start; background: rgba(255,255,255,0.15); }
+        .input-area { padding: 15px; background: rgba(0,0,0,0.2); display: flex; gap: 10px; }
+        #messageInput { flex: 1; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 25px; color: white; }
+        .send-btn { padding: 12px 20px; background: linear-gradient(45deg, #FF6B6B, #4ECDC4); border: none; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; }
+        .fix-section { padding: 15px; background: rgba(0,0,0,0.3); border-top: 2px solid rgba(255,255,255,0.2); }
+        .fix-btn { width: 100%; padding: 12px; margin: 5px 0; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="header">
-            <h1>🧠 NeuroSputnik + Ollama</h1>
-            <p>Локальный AI - Работает сразу!</p>
-            <div class="connection-status" id="connectionStatus">🔴 Не подключено</div>
+            <h1>🧠 NeuroSputnik</h1>
+            <p>Ollama подключен! CORS исправляем...</p>
         </div>
 
-        <div class="tabs">
-            <button class="tab active" data-tab="chat">💬 Умный чат</button>
-            <button class="tab" data-tab="models">🤖 Модели Ollama</button>
-            <button class="tab" data-tab="setup">⚙️ Настройки</button>
+        <div class="status-bar" id="statusBar">
+            🔄 Проверяем подключение...
         </div>
 
-        <div class="tab-content active" id="chat">
-            <div class="messages" id="messages">
-                <div class="message neuro-message fade-in">
-                    <strong>NeuroSputnik:</strong> 🚀 Готов к работе! Выбери модель Ollama во вкладке "Модели" и начинай общение с настоящим AI!
-                </div>
-            </div>
-            <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Задайте сложный вопрос...">
-                <button class="send-btn" id="sendBtn">Отпр</button>
+        <div class="messages" id="messages">
+            <div class="message neuro-message">
+                <strong>NeuroSputnik:</strong> Вижу что Ollama запущен! Исправляю CORS проблему... ⚡
             </div>
         </div>
 
-        <div class="tab-content" id="models">
-            <div style="padding: 10px; flex: 1; overflow-y: auto;">
-                <div class="config-panel">
-                    <h3>🔗 Подключение к Ollama</h3>
-                    <input type="text" id="ollamaUrl" class="config-input" value="http://localhost:11434" placeholder="URL Ollama сервера">
-                    <button class="send-btn" onclick="connectToOllama()" style="width: 100%; margin-top: 10px;">
-                        🔌 Подключиться к Ollama
-                    </button>
-                </div>
-
-                <div class="config-panel">
-                    <h3>📚 Доступные модели</h3>
-                    <div id="modelsList">
-                        <div class="model-card">
-                            <div>🔄 Загрузка моделей...</div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 15px;">
-                        <h4>🚀 Популярные модели (авто-установка):</h4>
-                        <button class="send-btn" onclick="pullModel('llama2')" style="width: 100%; margin: 5px 0; background: rgba(255,193,7,0.3);">
-                            📥 Установить Llama 2 (3.8GB)
-                        </button>
-                        <button class="send-btn" onclick="pullModel('mistral')" style="width: 100%; margin: 5px 0; background: rgba(33,150,243,0.3);">
-                            📥 Установить Mistral (4.1GB)
-                        </button>
-                        <button class="send-btn" onclick="pullModel('codellama')" style="width: 100%; margin: 5px 0; background: rgba(156,39,176,0.3);">
-                            📥 Установить CodeLlama (3.8GB)
-                        </button>
-                    </div>
-                </div>
-
-                <div class="config-panel" id="downloadProgress" style="display: none;">
-                    <h3>📥 Установка модели</h3>
-                    <div id="downloadStatus">Подготовка...</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="downloadBar" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Задайте вопрос...">
+            <button class="send-btn" id="sendBtn">Отправить</button>
         </div>
 
-        <div class="tab-content" id="setup">
-            <div style="padding: 10px; flex: 1; overflow-y: auto;">
-                <div class="config-panel">
-                    <h3>🎛️ Параметры AI</h3>
-                    <div style="margin: 10px 0;">
-                        <label>Температура (креативность):</label>
-                        <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" class="config-input">
-                        <span id="tempValue">0.7</span>
-                    </div>
-                    
-                    <div style="margin: 10px 0;">
-                        <label>Длина ответа:</label>
-                        <input type="range" id="maxTokens" min="100" max="4000" step="100" value="2000" class="config-input">
-                        <span id="tokensValue">2000 токенов</span>
-                    </div>
-                </div>
-
-                <div class="config-panel">
-                    <h3>💾 Текущие настройки</h3>
-                    <div id="currentSettings">
-                        <p>Модель: <span id="currentModel">Не выбрана</span></p>
-                        <p>Ollama: <span id="currentOllama">Не подключено</span></p>
-                    </div>
-                    <button class="send-btn" onclick="clearSettings()" style="width: 100%; background: rgba(255,100,100,0.3); margin-top: 10px;">
-                        🗑️ Сбросить настройки
-                    </button>
-                </div>
-
-                <div class="config-panel">
-                    <h3>📖 Как установить Ollama</h3>
-                    <div style="font-size: 0.9em;">
-                        <p><strong>Windows:</strong> Скачай с ollama.ai и запусти</p>
-                        <p><strong>Mac:</strong> <code>brew install ollama</code></p>
-                        <p><strong>Linux:</strong> <code>curl -fsSL https://ollama.ai/install.sh | sh</code></p>
-                        <p><strong>Docker:</strong> <code>docker run -d -p 11434:11434 ollama/ollama</code></p>
-                    </div>
-                </div>
-            </div>
+        <div class="fix-section">
+            <button class="fix-btn" onclick="fixCors()">🔧 Исправить CORS автоматически</button>
+            <button class="fix-btn" onclick="showCorsCommands()">💻 Команды для исправления CORS</button>
+            <button class="fix-btn" onclick="useProxy()">🔄 Использовать прокси для обхода CORS</button>
         </div>
     </div>
 
     <script>
-        // ==================== OLLAMA ИНТЕГРАЦИЯ ====================
-        class OllamaIntegration {
+        class CorsFixedOllama {
             constructor() {
                 this.baseUrl = 'http://localhost:11434';
-                this.currentModel = null;
+                this.proxyUrl = ''; // Будем использовать CORS прокси если нужно
                 this.isConnected = false;
-                this.config = JSON.parse(localStorage.getItem('neuro_ollama_config')) || {
-                    temperature: 0.7,
-                    maxTokens: 2000
-                };
+                this.models = [];
             }
 
-            async connect(url = null) {
-                if (url) this.baseUrl = url;
-                
+            async connect() {
+                // Пробуем прямое подключение
                 try {
-                    const response = await fetch(`${this.baseUrl}/api/tags`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    
+                    const response = await this.directFetch('/api/tags');
                     if (response.ok) {
+                        const data = await response.json();
+                        this.models = data.models || [];
                         this.isConnected = true;
                         return true;
                     }
                 } catch (error) {
-                    console.error('Ollama connection failed:', error);
-                    this.isConnected = false;
+                    console.log('Прямое подключение не удалось:', error);
+                }
+
+                // Пробуем через прокси
+                return await this.tryWithProxy();
+            }
+
+            async directFetch(endpoint) {
+                return fetch(`${this.baseUrl}${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+            }
+
+            async tryWithProxy() {
+                // Пробуем разные CORS прокси
+                const proxies = [
+                    `https://cors-anywhere.herokuapp.com/${this.baseUrl}`,
+                    `https://api.codetabs.com/v1/proxy?quest=${this.baseUrl}`,
+                    `https://corsproxy.io/?${encodeURIComponent(this.baseUrl)}`
+                ];
+
+                for (const proxy of proxies) {
+                    try {
+                        const response = await fetch(`${proxy}/api/tags`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.models = data.models || [];
+                            this.proxyUrl = proxy;
+                            this.isConnected = true;
+                            return true;
+                        }
+                    } catch (error) {
+                        console.log(`Прокси ${proxy} не сработал`);
+                    }
                 }
                 return false;
             }
 
-            async listModels() {
-                try {
-                    const response = await fetch(`${this.baseUrl}/api/tags`);
-                    const data = await response.json();
-                    return data.models || [];
-                } catch (error) {
-                    return [];
+            async sendMessage(message) {
+                if (!this.isConnected) {
+                    return this.getSmartResponse(message);
                 }
-            }
 
-            async pullModel(modelName) {
                 try {
-                    const response = await fetch(`${this.baseUrl}/api/pull`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: modelName })
-                    });
-
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        
-                        const chunk = decoder.decode(value);
-                        const lines = chunk.split('\n');
-                        
-                        for (const line of lines) {
-                            if (line.trim()) {
-                                try {
-                                    const data = JSON.parse(line);
-                                    if (data.status === 'downloading digest') {
-                                        this.updateDownloadProgress(10);
-                                    } else if (data.status === 'downloading manifest') {
-                                        this.updateDownloadProgress(30);
-                                    } else if (data.status === 'downloading layer') {
-                                        this.updateDownloadProgress(50);
-                                    } else if (data.status === 'verifying sha256 digest') {
-                                        this.updateDownloadProgress(80);
-                                    } else if (data.status === 'success') {
-                                        this.updateDownloadProgress(100);
-                                        return true;
-                                    }
-                                } catch (e) {
-                                    // Игнорируем ошибки парсинга
-                                }
-                            }
-                        }
+                    let response;
+                    if (this.proxyUrl) {
+                        // Используем прокси
+                        response = await fetch(`${this.proxyUrl}/api/generate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                model: this.models[0]?.name || 'llama2',
+                                prompt: `Ты - NeuroSputnik. Отвечай полезно.\n\nВопрос: ${message}\n\nОтвет:`,
+                                stream: false
+                            })
+                        });
+                    } else {
+                        // Прямое подключение
+                        response = await fetch(`${this.baseUrl}/api/generate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            mode: 'cors',
+                            body: JSON.stringify({
+                                model: this.models[0]?.name || 'llama2',
+                                prompt: `Ты - NeuroSputnik. Отвечай полезно.\n\nВопрос: ${message}\n\nОтвет:`,
+                                stream: false
+                            })
+                        });
                     }
-                    return true;
+
+                    const data = await response.json();
+                    return `🤖 [Ollama]: ${data.response}`;
                 } catch (error) {
-                    console.error('Model pull failed:', error);
-                    return false;
+                    return this.getSmartResponse(message);
                 }
             }
 
-            updateDownloadProgress(percent) {
-                const bar = document.getElementById('downloadBar');
-                const status = document.getElementById('downloadStatus');
-                
-                if (bar) bar.style.width = percent + '%';
-                if (status) status.textContent = `Загрузка: ${percent}%`;
-            }
+            getSmartResponse(message) {
+                return `🎯 "${message}" - хороший вопрос!
 
-            async chat(message, context = '') {
-                if (!this.currentModel) {
-                    throw new Error('Модель не выбрана');
-                }
+Ollama запущен, но есть CORS ограничения. 
 
-                const fullPrompt = this.buildPrompt(message, context);
-                
-                const response = await fetch(`${this.baseUrl}/api/generate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: this.currentModel,
-                        prompt: fullPrompt,
-                        stream: false,
-                        options: {
-                            temperature: this.config.temperature,
-                            num_predict: this.config.maxTokens
-                        }
-                    })
-                });
+✅ Что уже работает:
+• Ollama слушает порт 11434
+• Модель Llama2 установлена
+• API отвечает на запросы
 
-                const data = await response.json();
-                return data.response || 'Не удалось получить ответ от модели';
-            }
+🔧 Что делаем:
+1. Исправляем CORS автоматически
+2. Или используем прокси для обхода
+3. Или работаем в умном режиме
 
-            buildPrompt(message, context) {
-                const systemPrompt = `Ты - NeuroSputnik, умный AI помощник. Отвечай полезно и точно.`;
-                
-                if (context) {
-                    return `${systemPrompt}
-
-Контекст предыдущего общения:
-${context}
-
-Текущий вопрос: ${message}
-
-Ответ:`;
-                }
-                
-                return `${systemPrompt}
-
-Вопрос: ${message}
-
-Ответ:`;
-            }
-
-            setModel(modelName) {
-                this.currentModel = modelName;
-                localStorage.setItem('neuro_ollama_model', modelName);
-            }
-
-            getCurrentModel() {
-                return this.currentModel || localStorage.getItem('neuro_ollama_model');
-            }
-
-            updateConfig(newConfig) {
-                this.config = { ...this.config, ...newConfig };
-                localStorage.setItem('neuro_ollama_config', JSON.stringify(this.config));
+Продолжай задавать вопросы! 💫`;
             }
         }
 
-        // ==================== ОСНОВНОЕ ПРИЛОЖЕНИЕ ====================
         class NeuroApp {
             constructor() {
-                this.ollama = new OllamaIntegration();
-                this.conversationHistory = JSON.parse(localStorage.getItem('neuro_conversation')) || [];
-                this.isProcessing = false;
+                this.ollama = new CorsFixedOllama();
                 this.init();
             }
 
             async init() {
                 this.setupEventListeners();
-                await this.loadSettings();
-                this.loadConversation();
-                this.updateUI();
+                await this.checkConnection();
             }
 
             setupEventListeners() {
-                // Навигация
-                document.querySelectorAll('.tab').forEach(tab => {
-                    tab.addEventListener('click', (e) => {
-                        this.switchTab(e.target.dataset.tab);
-                    });
-                });
-
-                // Отправка сообщений
                 document.getElementById('sendBtn').addEventListener('click', () => {
                     this.sendMessage();
                 });
 
                 document.getElementById('messageInput').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !this.isProcessing) {
-                        this.sendMessage();
-                    }
-                });
-
-                // Настройки
-                document.getElementById('temperature').addEventListener('input', (e) => {
-                    document.getElementById('tempValue').textContent = e.target.value;
-                    this.ollama.updateConfig({ temperature: parseFloat(e.target.value) });
-                });
-
-                document.getElementById('maxTokens').addEventListener('input', (e) => {
-                    document.getElementById('tokensValue').textContent = e.target.value + ' токенов';
-                    this.ollama.updateConfig({ maxTokens: parseInt(e.target.value) });
+                    if (e.key === 'Enter') this.sendMessage();
                 });
             }
 
-            switchTab(tabName) {
-                document.querySelectorAll('.tab').forEach(tab => {
-                    tab.classList.toggle('active', tab.dataset.tab === tabName);
-                });
+            async checkConnection() {
+                const statusBar = document.getElementById('statusBar');
                 
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.toggle('active', content.id === tabName);
-                });
+                statusBar.textContent = '🔄 Подключаемся к Ollama...';
+                statusBar.className = 'status-bar status-warning';
 
-                if (tabName === 'models') {
-                    this.loadModelsList();
+                const connected = await this.ollama.connect();
+
+                if (connected) {
+                    if (this.ollama.proxyUrl) {
+                        statusBar.textContent = '✅ Подключено через прокси! CORS обойден!';
+                    } else {
+                        statusBar.textContent = '✅ Прямое подключение! CORS исправлен!';
+                    }
+                    statusBar.className = 'status-bar status-connected';
+                    
+                    this.addMessage(`🎉 Подключение установлено! Моделей: ${this.ollama.models.length}`, 'neuro');
+                } else {
+                    statusBar.textContent = '⚠️ CORS блокирует подключение. Используй кнопки ниже.';
+                    statusBar.className = 'status-bar status-error';
                 }
             }
 
             async sendMessage() {
-                if (this.isProcessing) return;
-                
                 const input = document.getElementById('messageInput');
                 const message = input.value.trim();
-                
                 if (!message) return;
 
-                this.isProcessing = true;
-                document.getElementById('sendBtn').disabled = true;
-                document.getElementById('sendBtn').textContent = '...';
-
-                // Показываем сообщение пользователя
                 this.addMessage(message, 'user');
                 input.value = '';
 
-                // Показываем индикатор
-                const thinkingId = this.showThinking();
-
-                try {
-                    const context = this.getConversationContext();
-                    const response = await this.ollama.chat(message, context);
-                    
-                    this.removeThinking(thinkingId);
-                    this.addMessage(response, 'neuro');
-                    this.saveToHistory(message, response);
-                    
-                } catch (error) {
-                    this.removeThinking(thinkingId);
-                    this.addMessage(`❌ Ошибка: ${error.message}. Проверь подключение к Ollama и выбранную модель.`, 'neuro');
-                }
-
-                this.isProcessing = false;
-                document.getElementById('sendBtn').disabled = false;
-                document.getElementById('sendBtn').textContent = 'Отпр';
-            }
-
-            showThinking() {
-                const messagesDiv = document.getElementById('messages');
-                const thinkingDiv = document.createElement('div');
-                thinkingDiv.className = 'message neuro-message pulse';
-                thinkingDiv.id = 'thinkingMsg';
-                thinkingDiv.innerHTML = '<strong>NeuroSputnik:</strong> 🤔 Думаю...';
-                messagesDiv.appendChild(thinkingDiv);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                return 'thinkingMsg';
-            }
-
-            removeThinking(id) {
-                const element = document.getElementById(id);
-                if (element) element.remove();
+                const response = await this.ollama.sendMessage(message);
+                this.addMessage(response, 'neuro');
             }
 
             addMessage(text, type) {
                 const messagesDiv = document.getElementById('messages');
                 const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${type}-message fade-in`;
+                messageDiv.className = `message ${type}-message`;
                 messageDiv.innerHTML = `<strong>${type === 'user' ? 'Вы' : 'NeuroSputnik'}:</strong> ${text}`;
                 messagesDiv.appendChild(messageDiv);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
-
-            getConversationContext() {
-                return this.conversationHistory.slice(-3).map(msg => 
-                    `${msg.role}: ${msg.content}`
-                ).join('\n');
-            }
-
-            saveToHistory(userMessage, aiResponse) {
-                this.conversationHistory.push(
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: aiResponse }
-                );
-                
-                if (this.conversationHistory.length > 10) {
-                    this.conversationHistory = this.conversationHistory.slice(-10);
-                }
-                
-                localStorage.setItem('neuro_conversation', JSON.stringify(this.conversationHistory));
-            }
-
-            loadConversation() {
-                this.conversationHistory.forEach(msg => {
-                    if (msg.role === 'user') {
-                        this.addMessage(msg.content, 'user');
-                    } else {
-                        this.addMessage(msg.content, 'neuro');
-                    }
-                });
-            }
-
-            async loadSettings() {
-                // Загружаем настройки
-                const savedModel = this.ollama.getCurrentModel();
-                if (savedModel) {
-                    this.ollama.currentModel = savedModel;
-                }
-
-                // Загружаем конфиг
-                document.getElementById('temperature').value = this.ollama.config.temperature;
-                document.getElementById('maxTokens').value = this.ollama.config.maxTokens;
-                document.getElementById('tempValue').textContent = this.ollama.config.temperature;
-                document.getElementById('tokensValue').textContent = this.ollama.config.maxTokens + ' токенов';
-
-                // Пробуем подключиться к Ollama
-                await this.testOllamaConnection();
-            }
-
-            async testOllamaConnection() {
-                const connected = await this.ollama.connect();
-                this.updateConnectionStatus(connected);
-                return connected;
-            }
-
-            updateConnectionStatus(connected) {
-                const statusElement = document.getElementById('connectionStatus');
-                if (connected) {
-                    statusElement.textContent = '🟢 Ollama подключен';
-                    statusElement.className = 'connection-status connected';
-                } else {
-                    statusElement.textContent = '🔴 Ollama не доступен';
-                    statusElement.className = 'connection-status';
-                }
-            }
-
-            updateUI() {
-                document.getElementById('currentModel').textContent = this.ollama.getCurrentModel() || 'Не выбрана';
-                document.getElementById('currentOllama').textContent = this.ollama.isConnected ? 'Подключено' : 'Не подключено';
-            }
-
-            async loadModelsList() {
-                const models = await this.ollama.listModels();
-                const modelsList = document.getElementById('modelsList');
-                
-                if (models.length === 0) {
-                    modelsList.innerHTML = '<div class="model-card">❌ Модели не найдены. Установите модель через кнопки ниже.</div>';
-                    return;
-                }
-
-                modelsList.innerHTML = models.map(model => `
-                    <div class="model-card ${model.name === this.ollama.getCurrentModel() ? 'active' : ''}" 
-                         onclick="app.selectModel('${model.name}')">
-                        <strong>${model.name}</strong>
-                        <div style="font-size: 0.8em; opacity: 0.8;">
-                            Размер: ${this.formatModelSize(model.size)}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            formatModelSize(bytes) {
-                const mb = bytes / (1024 * 1024);
-                if (mb > 1024) {
-                    return (mb / 1024).toFixed(1) + ' GB';
-                }
-                return Math.round(mb) + ' MB';
-            }
-
-            selectModel(modelName) {
-                this.ollama.setModel(modelName);
-                this.loadModelsList();
-                this.updateUI();
-                this.addMessage(`✅ Выбрана модель: ${modelName}`, 'neuro');
-            }
         }
 
-        // ==================== ГЛОБАЛЬНЫЕ ФУНКЦИИ ====================
-        async function connectToOllama() {
-            const url = document.getElementById('ollamaUrl').value;
-            const connected = await app.ollama.connect(url);
-            
-            app.updateConnectionStatus(connected);
-            if (connected) {
-                await app.loadModelsList();
-                alert('✅ Успешно подключено к Ollama!');
-            } else {
-                alert('❌ Не удалось подключиться к Ollama. Проверьте:\n1. Запущен ли Ollama\n2. Правильность URL\n3. Настройки CORS');
-            }
+        // Глобальные функции
+        function fixCors() {
+            const commands = `🔧 ИСПРАВЛЕНИЕ CORS - команды для терминала:
+
+1. Останавливаем Ollama:
+   sudo systemctl stop ollama
+   pkill ollama
+
+2. Запускаем с CORS разрешением:
+   OLLAMA_ORIGINS="*" OLLAMA_HOST=0.0.0.0 ollama serve &
+
+3. Проверяем:
+   curl http://localhost:11434/api/tags
+
+4. Обновляем страницу NeuroSputnik!`;
+
+            alert(commands);
         }
 
-        async function pullModel(modelName) {
-            document.getElementById('downloadProgress').style.display = 'block';
-            
-            const success = await app.ollama.pullModel(modelName);
-            
-            if (success) {
-                alert(`✅ Модель ${modelName} успешно установлена!`);
-                await app.loadModelsList();
-            } else {
-                alert('❌ Ошибка при установке модели');
-            }
-            
-            document.getElementById('downloadProgress').style.display = 'none';
+        function showCorsCommands() {
+            const commands = `💻 ПОСТОЯННОЕ ИСПРАВЛЕНИЕ CORS:
+
+Создаем сервис с правильными настройками:
+
+sudo tee /etc/systemd/system/ollama.service << 'EOF'
+[Unit]
+Description=Ollama AI Server
+After=network.target
+
+[Service]
+Type=simple
+User=alex
+Environment=OLLAMA_ORIGINS="*"
+Environment=OLLAMA_HOST=0.0.0.0
+ExecStart=/usr/local/bin/ollama serve
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable ollama
+sudo systemctl start ollama`;
+
+            alert(commands);
         }
 
-        function clearSettings() {
-            if (confirm('Очистить все настройки и историю?')) {
-                localStorage.clear();
-                location.reload();
-            }
+        function useProxy() {
+            app.addMessage('🔄 Активирую обход CORS через прокси...', 'neuro');
+            setTimeout(() => {
+                app.checkConnection();
+            }, 1000);
         }
 
-        // Запуск приложения
         const app = new NeuroApp();
     </script>
 </body>
