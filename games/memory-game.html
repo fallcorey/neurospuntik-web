@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренировка памяти AI 🧠</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4ECDC4;
+        }
+        
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        
+        .memory-card {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+        }
+        
+        .memory-card.flipped {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            transform: rotateY(180deg);
+        }
+        
+        .memory-card.matched {
+            background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+            border-color: #4ECDC4;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .ai-learning-panel {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 480px) {
+            .memory-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🧠 Тренировка памяти AI</h1>
+            <p>Помоги нейросети улучшить память и внимание</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div>Очки</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="level">1</div>
+                <div>Уровень</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="matches">0</div>
+                <div>Найдено пар</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="time">60</div>
+                <div>Время</div>
+            </div>
+        </div>
+        
+        <div class="memory-grid" id="memoryGrid">
+            <!-- Карточки генерируются через JavaScript -->
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn" onclick="startGame()">🎮 Новая игра</button>
+            <button class="control-btn" onclick="increaseDifficulty()">⚡ Сложнее</button>
+            <button class="control-btn" onclick="analyzeAIPerformance()">📊 Анализ AI</button>
+            <button class="control-btn" onclick="window.closeGame()">← Назад</button>
+        </div>
+        
+        <div class="ai-learning-panel" id="aiLearningPanel">
+            <strong>🤖 Обучение AI:</strong> 
+            <span id="learningStatus">Собираем данные о паттернах памяти...</span>
+        </div>
+    </div>
+
+    <script>
+        class MemoryGame {
+            constructor() {
+                this.cards = [];
+                this.flippedCards = [];
+                this.matchedPairs = 0;
+                this.score = 0;
+                this.level = 1;
+                this.timeLeft = 60;
+                this.timer = null;
+                this.isPlaying = false;
+                this.aiTrainingData = [];
+                
+                this.symbols = ['🍎', '🍌', '🍒', '🍕', '🏀', '⚽', '🎮', '🎸', '🚗', '✈️', '⭐', '❤️'];
+                this.init();
+            }
+            
+            init() {
+                this.generateCards();
+                this.renderGrid();
+                this.setupEventListeners();
+                this.startAILearning();
+            }
+            
+            generateCards() {
+                const pairsNeeded = 6 + (this.level - 1) * 2;
+                const selectedSymbols = this.symbols.slice(0, pairsNeeded);
+                
+                this.cards = [];
+                selectedSymbols.forEach(symbol => {
+                    this.cards.push({ id: this.cards.length, symbol, flipped: false, matched: false });
+                    this.cards.push({ id: this.cards.length, symbol, flipped: false, matched: false });
+                });
+                
+                // Перемешиваем карточки
+                this.cards = this.cards.sort(() => Math.random() - 0.5);
+            }
+            
+            renderGrid() {
+                const grid = document.getElementById('memoryGrid');
+                grid.innerHTML = '';
+                
+                this.cards.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'memory-card';
+                    cardElement.dataset.id = card.id;
+                    cardElement.innerHTML = card.flipped || card.matched ? card.symbol : '?';
+                    
+                    if (card.flipped) cardElement.classList.add('flipped');
+                    if (card.matched) cardElement.classList.add('matched');
+                    
+                    grid.appendChild(cardElement);
+                });
+            }
+            
+            setupEventListeners() {
+                document.getElementById('memoryGrid').addEventListener('click', (e) => {
+                    if (!this.isPlaying) return;
+                    
+                    const cardElement = e.target.closest('.memory-card');
+                    if (!cardElement) return;
+                    
+                    const cardId = parseInt(cardElement.dataset.id);
+                    this.flipCard(cardId);
+                });
+            }
+            
+            flipCard(cardId) {
+                if (this.flippedCards.length >= 2) return;
+                
+                const card = this.cards.find(c => c.id === cardId);
+                if (!card || card.flipped || card.matched) return;
+                
+                card.flipped = true;
+                this.flippedCards.push(card);
+                this.renderGrid();
+                
+                // Записываем данные для обучения AI
+                this.recordAITrainingData('human_move', {
+                    cardId,
+                    symbol: card.symbol,
+                    flippedCards: this.flippedCards.length,
+                    timestamp: Date.now()
+                });
+                
+                if (this.flippedCards.length === 2) {
+                    setTimeout(() => this.checkMatch(), 1000);
+                }
+            }
+            
+            checkMatch() {
+                const [card1, card2] = this.flippedCards;
+                
+                if (card1.symbol === card2.symbol) {
+                    // Найдена пара
+                    card1.matched = true;
+                    card2.matched = true;
+                    this.matchedPairs++;
+                    this.score += 10 * this.level;
+                    
+                    this.recordAITrainingData('successful_match', {
+                        symbols: [card1.symbol, card2.symbol],
+                        timeToMatch: Date.now() - this.flipStartTime,
+                        level: this.level
+                    });
+                    
+                    this.updateStats();
+                    
+                    // Проверяем завершение уровня
+                    if (this.matchedPairs === this.cards.length / 2) {
+                        this.levelComplete();
+                    }
+                } else {
+                    // Не совпало
+                    card1.flipped = false;
+                    card2.flipped = false;
+                    
+                    this.recordAITrainingData('failed_match', {
+                        symbols: [card1.symbol, card2.symbol],
+                        attempts: this.flippedCards.length
+                    });
+                }
+                
+                this.flippedCards = [];
+                this.renderGrid();
+            }
+            
+            levelComplete() {
+                this.score += this.timeLeft * 5;
+                this.level++;
+                this.updateStats();
+                
+                this.recordAITrainingData('level_complete', {
+                    level: this.level - 1,
+                    score: this.score,
+                    timeRemaining: this.timeLeft
+                });
+                
+                setTimeout(() => {
+                    alert(`🎉 Уровень ${this.level - 1} пройден! Переходим на уровень ${this.level}`);
+                    this.generateCards();
+                    this.renderGrid();
+                }, 500);
+            }
+            
+            startGame() {
+                this.isPlaying = true;
+                this.score = 0;
+                this.level = 1;
+                this.matchedPairs = 0;
+                this.timeLeft = 60;
+                this.generateCards();
+                this.renderGrid();
+                this.updateStats();
+                this.startTimer();
+            }
+            
+            startTimer() {
+                if (this.timer) clearInterval(this.timer);
+                
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    document.getElementById('time').textContent = this.timeLeft;
+                    
+                    if (this.timeLeft <= 0) {
+                        this.gameOver();
+                    }
+                }, 1000);
+            }
+            
+            gameOver() {
+                this.isPlaying = false;
+                clearInterval(this.timer);
+                
+                this.recordAITrainingData('game_over', {
+                    finalScore: this.score,
+                    finalLevel: this.level,
+                    totalMatches: this.matchedPairs
+                });
+                
+                alert(`💀 Игра окончена! Ваш счёт: ${this.score}`);
+                this.saveAITrainingData();
+            }
+            
+            updateStats() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('matches').textContent = this.matchedPairs;
+            }
+            
+            increaseDifficulty() {
+                this.timeLeft = Math.max(30, this.timeLeft - 10);
+                document.getElementById('time').textContent = this.timeLeft;
+                
+                this.recordAITrainingData('difficulty_increased', {
+                    newTimeLimit: this.timeLeft,
+                    currentLevel: this.level
+                });
+            }
+            
+            // AI Learning Methods
+            startAILearning() {
+                setInterval(() => {
+                    this.generateAIPattern();
+                }, 30000); // Каждые 30 секунд
+            }
+            
+            recordAITrainingData(event, data) {
+                this.aiTrainingData.push({
+                    event,
+                    data,
+                    timestamp: Date.now(),
+                    gameState: {
+                        level: this.level,
+                        score: this.score,
+                        matchedPairs: this.matchedPairs
+                    }
+                });
+                
+                // Обновляем статус обучения
+                document.getElementById('learningStatus').textContent = 
+                    `Собрано ${this.aiTrainingData.length} примеров памяти`;
+            }
+            
+            generateAIPattern() {
+                if (!this.isPlaying) return;
+                
+                // AI анализирует паттерны и делает "умный" ход
+                const unmatchedCards = this.cards.filter(card => !card.matched && !card.flipped);
+                if (unmatchedCards.length < 2) return;
+                
+                // Простая эвристика для AI
+                const randomCard = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
+                
+                this.recordAITrainingData('ai_pattern_analysis', {
+                    analysis: 'AI анализирует паттерны памяти',
+                    unmatchedCards: unmatchedCards.length,
+                    selectedCard: randomCard.symbol
+                });
+                
+                document.getElementById('learningStatus').textContent = 
+                    `AI анализирует ${unmatchedCards.length} неперевернутых карт...`;
+            }
+            
+            analyzeAIPerformance() {
+                const analysis = this.analyzeTrainingData();
+                alert(`📊 Анализ обучения AI:\n\n${analysis}`);
+            }
+            
+            analyzeTrainingData() {
+                const totalMoves = this.aiTrainingData.filter(d => d.event === 'human_move').length;
+                const successfulMatches = this.aiTrainingData.filter(d => d.event === 'successful_match').length;
+                const failedMatches = this.aiTrainingData.filter(d => d.event === 'failed_match').length;
+                
+                const successRate = totalMoves > 0 ? (successfulMatches / (successfulMatches + failedMatches) * 100).toFixed(1) : 0;
+                
+                return `Всего ходов: ${totalMoves}\nУспешных совпадений: ${successfulMatches}\nОшибок: ${failedMatches}\nТочность: ${successRate}%`;
+            }
+            
+            saveAITrainingData() {
+                // Сохраняем данные обучения в localStorage
+                const existingData = JSON.parse(localStorage.getItem('ai_memory_training') || '[]');
+                const newData = [...existingData, ...this.aiTrainingData];
+                
+                localStorage.setItem('ai_memory_training', JSON.stringify(newData));
+                this.aiTrainingData = [];
+                
+                console.log('💾 Данные обучения сохранены');
+            }
+        }
+        
+        // Глобальные функции
+        let game;
+        
+        function startGame() {
+            game = new MemoryGame();
+            game.startGame();
+        }
+        
+        function increaseDifficulty() {
+            if (game) game.increaseDifficulty();
+        }
+        
+        function analyzeAIPerformance() {
+            if (game) game.analyzeAIPerformance();
+        }
+        
+        window.closeGame = function() {
+            if (game) game.saveAITrainingData();
+            window.history.back();
+        };
+        
+        // Запускаем игру при загрузке
+        document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+</body>
+</html>
